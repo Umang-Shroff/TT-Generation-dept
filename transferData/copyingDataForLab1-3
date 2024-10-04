@@ -16,9 +16,9 @@ Sub SearchAndCopyValues()
     Set wsDest3 = ThisWorkbook.Sheets("Lab3")
 
     ' Clear any existing data in the destination sheets
-    wsDest1.Cells.Clear
-    wsDest2.Cells.Clear
-    wsDest3.Cells.Clear
+    ' wsDest1.Cells.Clear
+    ' wsDest2.Cells.Clear
+    ' wsDest3.Cells.Clear
 
     ' Loop through each cell in the source worksheet
     For Each cell In wsSource.UsedRange
