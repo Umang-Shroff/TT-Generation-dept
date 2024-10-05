@@ -1,0 +1,90 @@
+Sub StringMatchingLab22()
+    Dim wsSource As Worksheet
+    Dim wsDestL1 As Worksheet
+    Dim wsDestL2 As Worksheet
+    Dim wsDestL3 As Worksheet
+    Dim wsDestSSP As Worksheet
+    Dim wsDestHD As Worksheet
+    Dim wsDestRS As Worksheet
+    Dim cell As Range
+    Dim subjects As Variant
+    Dim subject As Variant
+    Dim timeValue As String
+    Dim destRow As Variant
+    Dim col As Long
+    Dim destCol As Long
+    Dim cellContent As String
+    Dim startPos As Long
+    Dim endPos As Long
+
+    ' Set the source worksheet and destination worksheets for each lab
+    Set wsSource = ThisWorkbook.Sheets("main")
+    Set wsDestL1 = ThisWorkbook.Sheets("L1")
+    Set wsDestL2 = ThisWorkbook.Sheets("L2")
+    Set wsDestL3 = ThisWorkbook.Sheets("L3")
+    ' Clear any existing data in the subject columns (B onwards)
+
+    ' Copy time values to destination sheets
+    Dim lastRow As Long
+    lastRow = wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row
+    wsDestL1.Range("A1:A" & lastRow).Value = wsSource.Range("A1:A" & lastRow).Value
+    wsDestL2.Range("A1:A" & lastRow).Value = wsSource.Range("A1:A" & lastRow).Value
+    wsDestL3.Range("A1:A" & lastRow).Value = wsSource.Range("A1:A" & lastRow).Value
+
+    ' Loop through each row in the source worksheet
+    For Each cell In wsSource.UsedRange.Rows
+        ' Get the time value (the first cell in the row)
+        timeValue = wsSource.Cells(cell.Row, 1).Value
+        
+        ' Loop through columns B to H (2 to 8)
+        For col = 2 To 8 ' Columns B to H
+            ' Check if the cell in the current column is not empty
+            If wsSource.Cells(cell.Row, col).Value <> "" Then
+                ' Get the full content of the cell
+                cellContent = wsSource.Cells(cell.Row, col).Value
+                
+                ' Check for each lab code in the cell content
+                Do While InStr(cellContent, "(L1)") > 0 Or InStr(cellContent, "(L2)") > 0 Or InStr(cellContent, "(L3)") > 0
+                    
+                    If InStr(cellContent, "(L1)") > 0 Then
+                        startPos = InStr(cellContent, "(L1)") ' Find position of (L1)
+                        endPos = startPos + 3 ' End position of (L1)
+                        subject = Trim(Mid(cellContent, 1, endPos)) ' Extract the subject
+                        destRow = Application.Match(timeValue, wsDestL1.Columns(1), 0)
+                        If Not IsError(destRow) Then
+                            wsDestL1.Cells(destRow, col).Value = subject ' Set subject in the same column
+                        End If
+                        cellContent = Replace(cellContent, subject, "") ' Remove the processed subject
+                    End If
+                    
+                    If InStr(cellContent, "(L2)") > 0 Then
+                        startPos = InStr(cellContent, "(L2)")
+                        endPos = startPos + 3
+                        subject = Trim(Mid(cellContent, 1, endPos))
+                        destRow = Application.Match(timeValue, wsDestL2.Columns(1), 0)
+                        If Not IsError(destRow) Then
+                            wsDestL2.Cells(destRow, col).Value = subject
+                        End If
+                        cellContent = Replace(cellContent, subject, "")
+                    End If
+                    
+                    If InStr(cellContent, "(L3)") > 0 Then
+                        startPos = InStr(cellContent, "(L3)")
+                        endPos = startPos + 3
+                        subject = Trim(Mid(cellContent, 1, endPos))
+                        destRow = Application.Match(timeValue, wsDestL3.Columns(1), 0)
+                        If Not IsError(destRow) Then
+                            wsDestL3.Cells(destRow, col).Value = subject
+                        End If
+                        cellContent = Replace(cellContent, subject, "")
+                    End If
+                    
+                Loop
+            End If
+        Next col
+    Next cell
+
+    MsgBox "Subjects have been added to their respective lab sheets based on time."
+End Sub
+
+
