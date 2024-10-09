@@ -1,6 +1,8 @@
 1. Unmerge all cells within the range
-2. Run code for String Matching and Copying data to another sheet for Class rooms
-3. Run code for String Matching and Copying data to another sheet for Labs BatchWise (Pending)
-4. Run code for String Matching and Copying data to another sheet for Tutorials (Pending)
-5. Run code for String Matching and Copying data to another sheet for Individual Teachers' Time table (Pending)
-6. Run code to Merge all cells with same value in all these separate sheets 
+2. In Sheet1 make time slots in Column A 
+3. Run code for creating Sheets for class, lab, teacher and copying column A of Sheet1 
+4. Run code for String Matching and Copying data to another sheet for Class rooms
+5. Run code for String Matching and Copying data to another sheet for Labs BatchWise (Pending)
+6. Run code for String Matching and Copying data to another sheet for Tutorials (Pending)
+7. Run code for String Matching and Copying data to another sheet for Individual Teachers' Time table (Pending)
+8. Run code to Merge all cells with same value in all these separate sheets 
