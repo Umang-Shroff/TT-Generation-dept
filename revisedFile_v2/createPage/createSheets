@@ -1,0 +1,18 @@
+Sub CreateSheets()
+    Dim sheetNames As Variant
+    Dim sheetName As Variant
+    
+    ' Define the names of the new sheets
+    sheetNames = Array("a", "b", "c")
+    
+    ' Loop through the array and create new sheets
+    For Each sheetName In sheetNames
+        ' Check if the sheet already exists
+        On Error Resume Next
+        If Not Evaluate("ISREF('" & sheetName & "'!A1)") Then
+            Sheets.Add(After:=Sheets(Sheets.Count)).Name = sheetName
+        End If
+        On Error GoTo 0
+    Next sheetName
+End Sub
+
