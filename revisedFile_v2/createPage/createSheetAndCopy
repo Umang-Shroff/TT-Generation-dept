@@ -1,0 +1,27 @@
+Sub CreateAndCopySheets()
+    Dim sheetNames As Variant
+    Dim sheetName As Variant
+    Dim sourceSheet As Worksheet
+    Dim newSheet As Worksheet
+    
+    ' Define the names of the new sheets
+    sheetNames = Array("a", "b", "c")
+    
+    ' Set the source sheet
+    Set sourceSheet = ThisWorkbook.Sheets("Lab1")
+    
+    ' Loop through the array and create new sheets
+    For Each sheetName In sheetNames
+        ' Check if the sheet already exists
+        On Error Resume Next
+        If Not Evaluate("ISREF('" & sheetName & "'!A1)") Then
+            Set newSheet = Sheets.Add(After:=Sheets(Sheets.Count))
+            newSheet.Name = sheetName
+            
+            ' Copy data from source sheet to the new sheet
+            sourceSheet.UsedRange.Copy newSheet.Range("A1")
+        End If
+        On Error GoTo 0
+    Next sheetName
+End Sub
+
