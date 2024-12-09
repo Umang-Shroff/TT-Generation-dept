@@ -10,13 +10,14 @@ Sub StringMatchingLec()
     Dim destRow As Variant
     Dim col As Long
     Dim destCol As Long
+    Dim prefix As String
+    Dim fullSubject As String
 
     ' Set the source worksheet and destination worksheets for each lab
     Set wsSource = ThisWorkbook.Sheets("main")
-    Set wsDestL1 = ThisWorkbook.Sheets("63")
-    Set wsDestL2 = ThisWorkbook.Sheets("64")
+    Set wsDestL1 = ThisWorkbook.Sheets("64")
+    Set wsDestL2 = ThisWorkbook.Sheets("65")
     Set wsDestL3 = ThisWorkbook.Sheets("66")
-
 
     ' Copy time values to destination sheets
     wsDestL1.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).Value = wsSource.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).Value
@@ -40,23 +41,33 @@ Sub StringMatchingLec()
                     ' Find the corresponding destination column
                     destCol = col ' Same column index in destination sheet
 
-                    If InStr(subject, "(63)") > 0 Then
-                        ' Find the row in LabSheet_L1 matching the time
-                        destRow = Application.Match(timeValue, wsDestL1.Columns(1), 0)
+                    ' If the subject has a prefix (e.g., I3-1:CG(64)), keep the prefix as well
+                    If InStr(subject, ":") > 0 Then
+                        prefix = Trim(Split(subject, ":")(0)) ' Extract the prefix (e.g., I3-1)
+                        fullSubject = subject ' Keep the full subject (e.g., I3-1:CG(64))
+                    Else
+                        prefix = "" ' No prefix
+                        fullSubject = subject ' Just the subject (e.g., CG(64))
+                    End If
+
+                    ' Now handle the lab code part separately
+                    If InStr(fullSubject, "(64)") > 0 Then
+                        ' Find the row in LabSheet_64 matching the time
+                        destRow = Application.match(timeValue, wsDestL1.Columns(1), 0)
                         If Not IsError(destRow) Then
-                            wsDestL1.Cells(destRow, destCol).Value = subject ' Set subject in the same column
+                            wsDestL1.Cells(destRow, destCol).Value = fullSubject ' Set full subject with prefix in the same column
                         End If
-                    ElseIf InStr(subject, "(64)") > 0 Then
-                        ' Find the row in LabSheet_L2 matching the time
-                        destRow = Application.Match(timeValue, wsDestL2.Columns(1), 0)
+                    ElseIf InStr(fullSubject, "(65)") > 0 Then
+                        ' Find the row in LabSheet_65 matching the time
+                        destRow = Application.match(timeValue, wsDestL2.Columns(1), 0)
                         If Not IsError(destRow) Then
-                            wsDestL2.Cells(destRow, destCol).Value = subject ' Set subject in the same column
+                            wsDestL2.Cells(destRow, destCol).Value = fullSubject ' Set full subject with prefix in the same column
                         End If
-                    ElseIf InStr(subject, "(66)") > 0 Then
-                        ' Find the row in LabSheet_L3 matching the time
-                        destRow = Application.Match(timeValue, wsDestL3.Columns(1), 0)
+                    ElseIf InStr(fullSubject, "(66)") > 0 Then
+                        ' Find the row in LabSheet_66 matching the time
+                        destRow = Application.match(timeValue, wsDestL3.Columns(1), 0)
                         If Not IsError(destRow) Then
-                            wsDestL3.Cells(destRow, destCol).Value = subject ' Set subject in the same column
+                            wsDestL3.Cells(destRow, destCol).Value = fullSubject ' Set full subject with prefix in the same column
                         End If
                     End If
                 Next subject
@@ -66,3 +77,4 @@ Sub StringMatchingLec()
 
     MsgBox "Subjects have been added to their respective lab sheets based on time."
 End Sub
+
