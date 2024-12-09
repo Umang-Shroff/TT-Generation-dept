@@ -6,10 +6,10 @@ Sub CreateAndCopyColumnASheetsForClassAndLab()
     Dim lastRow As Long
     
     ' Define the names of the new sheets
-    sheetNames = Array("64", "65", "66", "Lab1", "Lab2", "Lab3")
+    sheetNames = Array("64", "65", "66", "L1", "L2", "L3")
     
     ' Set the source sheet
-    Set sourceSheet = ThisWorkbook.Sheets("Sheet1")
+    Set sourceSheet = ThisWorkbook.Sheets("main")
     
     ' Find the last row in column A
     lastRow = sourceSheet.Cells(sourceSheet.Rows.Count, 1).End(xlUp).Row
@@ -28,4 +28,3 @@ Sub CreateAndCopyColumnASheetsForClassAndLab()
         On Error GoTo 0
     Next sheetName
 End Sub
-
