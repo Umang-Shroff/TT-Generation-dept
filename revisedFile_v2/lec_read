@@ -12,12 +12,22 @@ Sub StringMatchingLec()
     Dim destCol As Long
     Dim prefix As String
     Dim fullSubject As String
+    Dim regex As Object
+    Dim matches As Object
+    Dim match As Variant
+    Dim labCode As String
 
     ' Set the source worksheet and destination worksheets for each lab
     Set wsSource = ThisWorkbook.Sheets("main")
     Set wsDestL1 = ThisWorkbook.Sheets("64")
     Set wsDestL2 = ThisWorkbook.Sheets("65")
     Set wsDestL3 = ThisWorkbook.Sheets("66")
+
+    ' Initialize the regex object
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.IgnoreCase = True
+    regex.Global = True
+    regex.Pattern = "(.*?)(\(\d{2}\))" ' Pattern to capture the subject and lab code (e.g., (64), (65), etc.)
 
     ' Copy time values to destination sheets
     wsDestL1.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).Value = wsSource.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).Value
@@ -33,44 +43,39 @@ Sub StringMatchingLec()
         For col = 2 To 8 ' Columns B to H
             ' Check if the cell in the current column is not empty
             If wsSource.Cells(cell.Row, col).Value <> "" Then
-                ' Split the cell content into subjects (if multiple)
-                subjects = Split(wsSource.Cells(cell.Row, col).Value, " ") ' Assumes multiple subjects are separated by spaces
+                ' Get the full content of the cell
+                fullSubject = wsSource.Cells(cell.Row, col).Value
 
-                ' Check each subject for the lab codes
-                For Each subject In subjects
-                    ' Find the corresponding destination column
-                    destCol = col ' Same column index in destination sheet
+                ' Find matches using regular expression for subjects with lab codes
+                Set matches = regex.Execute(fullSubject)
+                
+                ' If a match is found
+                For Each match In matches
+                    subject = Trim(match.SubMatches(0)) ' Extract the subject
+                    labCode = Trim(match.SubMatches(1)) ' Extract the lab code (e.g., (64), (65), etc.)
+                    
+                    ' Normalize the format for the lab code (e.g., remove space before parentheses)
+                    fullSubject = subject & labCode
 
-                    ' If the subject has a prefix (e.g., I3-1:CG(64)), keep the prefix as well
-                    If InStr(subject, ":") > 0 Then
-                        prefix = Trim(Split(subject, ":")(0)) ' Extract the prefix (e.g., I3-1)
-                        fullSubject = subject ' Keep the full subject (e.g., I3-1:CG(64))
-                    Else
-                        prefix = "" ' No prefix
-                        fullSubject = subject ' Just the subject (e.g., CG(64))
-                    End If
-
-                    ' Now handle the lab code part separately
-                    If InStr(fullSubject, "(64)") > 0 Then
-                        ' Find the row in LabSheet_64 matching the time
-                        destRow = Application.match(timeValue, wsDestL1.Columns(1), 0)
-                        If Not IsError(destRow) Then
-                            wsDestL1.Cells(destRow, destCol).Value = fullSubject ' Set full subject with prefix in the same column
-                        End If
-                    ElseIf InStr(fullSubject, "(65)") > 0 Then
-                        ' Find the row in LabSheet_65 matching the time
-                        destRow = Application.match(timeValue, wsDestL2.Columns(1), 0)
-                        If Not IsError(destRow) Then
-                            wsDestL2.Cells(destRow, destCol).Value = fullSubject ' Set full subject with prefix in the same column
-                        End If
-                    ElseIf InStr(fullSubject, "(66)") > 0 Then
-                        ' Find the row in LabSheet_66 matching the time
-                        destRow = Application.match(timeValue, wsDestL3.Columns(1), 0)
-                        If Not IsError(destRow) Then
-                            wsDestL3.Cells(destRow, destCol).Value = fullSubject ' Set full subject with prefix in the same column
-                        End If
-                    End If
-                Next subject
+                    ' Determine the destination row for each lab code
+                    Select Case labCode
+                        Case "(64)"
+                            destRow = Application.match(timeValue, wsDestL1.Columns(1), 0)
+                            If Not IsError(destRow) Then
+                                wsDestL1.Cells(destRow, col).Value = "'" & fullSubject ' Preserve format with apostrophe
+                            End If
+                        Case "(65)"
+                            destRow = Application.match(timeValue, wsDestL2.Columns(1), 0)
+                            If Not IsError(destRow) Then
+                                wsDestL2.Cells(destRow, col).Value = "'" & fullSubject ' Preserve format with apostrophe
+                            End If
+                        Case "(66)"
+                            destRow = Application.match(timeValue, wsDestL3.Columns(1), 0)
+                            If Not IsError(destRow) Then
+                                wsDestL3.Cells(destRow, col).Value = "'" & fullSubject ' Preserve format with apostrophe
+                            End If
+                    End Select
+                Next match
             End If
         Next col
     Next cell
