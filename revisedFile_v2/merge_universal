@@ -8,11 +8,11 @@ Sub MergeSameValueCellsInFixedRange()
     Dim i As Integer
     Dim j As Integer
 
-    ' Initialize the array of strings for the ranges to check
-    rangeArray = Array("B1:B11", "C1:C11", "D1:D11", "E1:E11")
+    ' Initialize the array of strings for the ranges to check (columns only)
+    rangeArray = Array("B1:B20", "C1:C20", "D1:D20", "E1:E20", "F1:F20", "G1:G20")
     
     ' Initialize the array of sheet names
-    sheetNames = Array("main", "L1", "L2", "L3", "64", "63", "66")
+    sheetNames = Array("main", "L1", "L2", "L3", "64", "65", "66")
 
     ' Turn off alerts to prevent pop-ups during merging
     Application.DisplayAlerts = False
@@ -35,12 +35,12 @@ Sub MergeSameValueCellsInFixedRange()
                             Set mergeRange = cell
                             firstCellValue = cell.Value
                         ElseIf cell.Value = firstCellValue Then
-                            ' Expand mergeRange if the value matches
+                            ' Expand mergeRange if the value matches (only vertically)
                             Set mergeRange = Union(mergeRange, cell)
                         Else
-                            ' If the values don't match, merge the previous range
+                            ' If the values don't match, merge the previous range vertically
                             If Not mergeRange Is Nothing Then
-                                mergeRange.Merge
+                                mergeRange.merge
                                 mergeRange.Value = firstCellValue
                                 ' Center the merged cell's value
                                 mergeRange.HorizontalAlignment = xlCenter
@@ -53,7 +53,7 @@ Sub MergeSameValueCellsInFixedRange()
                     Else
                         ' If we hit an empty cell, finalize the merge for the current range
                         If Not mergeRange Is Nothing Then
-                            mergeRange.Merge
+                            mergeRange.merge
                             mergeRange.Value = firstCellValue
                             ' Center the merged cell's value
                             mergeRange.HorizontalAlignment = xlCenter
@@ -65,7 +65,7 @@ Sub MergeSameValueCellsInFixedRange()
 
                 ' Final merge check for any remaining range
                 If Not mergeRange Is Nothing Then
-                    mergeRange.Merge
+                    mergeRange.merge
                     mergeRange.Value = firstCellValue
                     ' Center the merged cell's value
                     mergeRange.HorizontalAlignment = xlCenter
@@ -78,5 +78,6 @@ Sub MergeSameValueCellsInFixedRange()
     ' Turn alerts back on
     Application.DisplayAlerts = True
 
-    MsgBox "Cells with the same value in the specified ranges have been merged across all specified sheets."
+    MsgBox "Cells with the same value in the specified ranges have been merged across all specified sheets (vertically only)."
 End Sub
+
