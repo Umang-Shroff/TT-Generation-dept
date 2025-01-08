@@ -34,8 +34,9 @@ Sub StringMatchingLab22()
     Set regex = CreateObject("VBScript.RegExp")
     regex.IgnoreCase = True
     regex.Global = True
-    regex.Pattern = "(.*?)(\(L1\)|\(L2\)|\(L3\))" ' Pattern to capture (L1), (L2), (L3) along with the subject
-    
+    ' Modify the pattern to match both "(L1)" and "(L-1)", "(L2)", "(L-2)", "(L3)", "(L-3)"
+    regex.Pattern = "(.*?)(\(L(-?\d+)\))" ' Pattern to capture (L1), (L2), (L3) along with the subject
+
     ' Loop through each row in the source worksheet
     For Each cell In wsSource.UsedRange.Rows
         ' Get the time value (the first cell in the row)
@@ -54,21 +55,21 @@ Sub StringMatchingLab22()
                 ' Loop through all matches (subjects with lab codes)
                 For Each match In matches
                     subject = Trim(match.SubMatches(0)) ' Extract the subject
-                    labCode = Trim(match.SubMatches(1)) ' Extract the lab code (e.g., (L1), (L2), (L3))
+                    labCode = Trim(match.SubMatches(1)) ' Extract the lab code (e.g., (L1), (L-1), etc.)
                     
                     ' Determine the destination row for each lab code
                     Select Case labCode
-                        Case "(L1)"
+                        Case "(L1)", "(L-1)"
                             destRow = Application.match(timeValue, wsDestL1.Columns(1), 0)
                             If Not IsError(destRow) Then
                                 wsDestL1.Cells(destRow, col).Value = subject & labCode
                             End If
-                        Case "(L2)"
+                        Case "(L2)", "(L-2)"
                             destRow = Application.match(timeValue, wsDestL2.Columns(1), 0)
                             If Not IsError(destRow) Then
                                 wsDestL2.Cells(destRow, col).Value = subject & labCode
                             End If
-                        Case "(L3)"
+                        Case "(L3)", "(L-3)"
                             destRow = Application.match(timeValue, wsDestL3.Columns(1), 0)
                             If Not IsError(destRow) Then
                                 wsDestL3.Cells(destRow, col).Value = subject & labCode
