@@ -4,6 +4,7 @@ Sub CreateAndCopyColumnASheetsForClassAndLab()
     Dim sourceSheet As Worksheet
     Dim newSheet As Worksheet
     Dim lastRow As Long
+    Dim lastCol As Long
     
     ' Define the names of the new sheets
     sheetNames = Array("64", "65", "66", "L1", "L2", "L3")
@@ -14,6 +15,9 @@ Sub CreateAndCopyColumnASheetsForClassAndLab()
     ' Find the last row in column A
     lastRow = sourceSheet.Cells(sourceSheet.Rows.Count, 1).End(xlUp).Row
     
+    ' Find the last used column in the source sheet (this ensures we get all data columns)
+    lastCol = sourceSheet.Cells(1, sourceSheet.Columns.Count).End(xlToLeft).Column
+    
     ' Loop through the array and create new sheets
     For Each sheetName In sheetNames
         ' Check if the sheet already exists
@@ -22,9 +26,22 @@ Sub CreateAndCopyColumnASheetsForClassAndLab()
             Set newSheet = Sheets.Add(After:=Sheets(Sheets.Count))
             newSheet.Name = sheetName
             
-            ' Copy data from column A of the source sheet to the new sheet
-            sourceSheet.Range("A1:A" & lastRow).Copy newSheet.Range("A1")
+            ' Copy data from column A starting from A2 to the new sheet (leave A1 blank)
+            sourceSheet.Range("A2:A" & lastRow).Copy newSheet.Range("A2")
+            
+            ' Copy entire row 1 from the source sheet to the new sheet, excluding A1
+            sourceSheet.Rows(1).Copy
+            newSheet.Rows(1).PasteSpecial Paste:=xlPasteValues
+            newSheet.Cells(1, 1).ClearContents ' Clear content in A1 of the new sheet
+            
+            ' Autofit columns to make cell size proper
+            newSheet.Columns.AutoFit
+            
+            ' Apply borders only to row 1 and column A
+            newSheet.Range("A1:A" & lastRow).Borders.LineStyle = xlContinuous ' Borders for column A
+            newSheet.Range("A1:" & newSheet.Cells(1, lastCol).Address).Borders.LineStyle = xlContinuous ' Borders for row 1
         End If
         On Error GoTo 0
     Next sheetName
 End Sub
+
