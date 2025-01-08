@@ -11,7 +11,7 @@ Sub UnmergeAndRetainValuesInFixedRange()
     Set ws = ActiveSheet
 
     ' Initialize the array of strings for ranges
-    rangeArray = Array("B1:B20", "C1:C20", "D1:D20", "E1:E20", "F1:F20", "G1:G20")
+    rangeArray = Array("B1:B25", "C1:C25", "D1:D25", "E1:E25", "F1:F25", "G1:G25")
 
     ' Loop through the indexes of the array
     For i = LBound(rangeArray) To UBound(rangeArray)
