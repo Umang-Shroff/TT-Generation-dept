@@ -19,7 +19,7 @@ Sub StringMatchingLec()
     Dim destCell As Range
 
     ' Set the source worksheet and destination worksheets for each lab
-    Set wsSource = ThisWorkbook.Sheets("SheetTest1")
+    Set wsSource = ThisWorkbook.Sheets("main")
     Set wsDestL1 = ThisWorkbook.Sheets("64")
     Set wsDestL2 = ThisWorkbook.Sheets("65")
     Set wsDestL3 = ThisWorkbook.Sheets("66")
