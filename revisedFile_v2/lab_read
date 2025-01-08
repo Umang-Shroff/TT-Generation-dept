@@ -4,7 +4,6 @@ Sub StringMatchingLab22()
     Dim wsDestL2 As Worksheet
     Dim wsDestL3 As Worksheet
     Dim cell As Range
-    Dim subjects As Variant
     Dim subject As Variant
     Dim timeValue As String
     Dim destRow As Variant
@@ -17,12 +16,16 @@ Sub StringMatchingLab22()
     Dim match As Variant
     Dim labCode As String
     Dim destCell As Range
+    Dim sourceA1Value As String ' Variable to hold the value of cell A1
 
     ' Set the source worksheet and destination worksheets for each lab
     Set wsSource = ThisWorkbook.Sheets("main")
     Set wsDestL1 = ThisWorkbook.Sheets("L1")
     Set wsDestL2 = ThisWorkbook.Sheets("L2")
     Set wsDestL3 = ThisWorkbook.Sheets("L3")
+
+    ' Get the value from A1 in the source sheet
+    sourceA1Value = wsSource.Range("A1").Value
 
     ' Clear any existing data in the subject columns (B onwards)
     Dim lastRow As Long
@@ -58,13 +61,16 @@ Sub StringMatchingLab22()
                     subject = Trim(match.SubMatches(0)) ' Extract the subject
                     labCode = Trim(match.SubMatches(1)) ' Extract the lab code (e.g., (L1), (L-1), etc.)
                     
+                    ' Prepend the value from A1 in brackets to the subject
+                    subject = "(" & sourceA1Value & ") " & subject
+
                     ' Determine the destination row for each lab code
                     Select Case labCode
                         Case "(L1)", "(L-1)"
                             destRow = Application.match(timeValue, wsDestL1.Columns(1), 0)
                             If Not IsError(destRow) Then
                                 Set destCell = wsDestL1.Cells(destRow, col)
-                                destCell.Value = subject & labCode
+                                destCell.Value = subject & labCode ' Append labCode
                                 ApplyBlackBorders destCell
                                 AutoFitCell destCell ' Auto-fit the cell
                             End If
@@ -72,7 +78,7 @@ Sub StringMatchingLab22()
                             destRow = Application.match(timeValue, wsDestL2.Columns(1), 0)
                             If Not IsError(destRow) Then
                                 Set destCell = wsDestL2.Cells(destRow, col)
-                                destCell.Value = subject & labCode
+                                destCell.Value = subject & labCode ' Append labCode
                                 ApplyBlackBorders destCell
                                 AutoFitCell destCell ' Auto-fit the cell
                             End If
@@ -80,7 +86,7 @@ Sub StringMatchingLab22()
                             destRow = Application.match(timeValue, wsDestL3.Columns(1), 0)
                             If Not IsError(destRow) Then
                                 Set destCell = wsDestL3.Cells(destRow, col)
-                                destCell.Value = subject & labCode
+                                destCell.Value = subject & labCode ' Append labCode
                                 ApplyBlackBorders destCell
                                 AutoFitCell destCell ' Auto-fit the cell
                             End If
