@@ -17,6 +17,7 @@ Sub StringMatchingLec()
     Dim match As Variant
     Dim labCode As String
     Dim destCell As Range
+    Dim sourceA1Value As String ' Variable to hold the value of cell A1
 
     ' Set the source worksheet and destination worksheets for each lab
     Set wsSource = ThisWorkbook.Sheets("main")
@@ -24,6 +25,9 @@ Sub StringMatchingLec()
     Set wsDestL2 = ThisWorkbook.Sheets("65")
     Set wsDestL3 = ThisWorkbook.Sheets("66")
 
+    ' Get the value from A1 in the source sheet (I2 or whatever it is)
+    sourceA1Value = wsSource.Range("A1").Value
+    
     ' Initialize the regex object
     Set regex = CreateObject("VBScript.RegExp")
     regex.IgnoreCase = True
@@ -57,6 +61,9 @@ Sub StringMatchingLec()
                     
                     ' Normalize the format for the lab code (e.g., remove space before parentheses)
                     fullSubject = subject & labCode
+
+                    ' Prepend the value from A1 in brackets to the full subject
+                    fullSubject = "(" & sourceA1Value & ") " & fullSubject
 
                     ' Determine the destination row for each lab code
                     Select Case labCode
