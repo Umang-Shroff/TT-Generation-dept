@@ -16,6 +16,7 @@ Sub StringMatchingLab22()
     Dim matches As Object
     Dim match As Variant
     Dim labCode As String
+    Dim destCell As Range
 
     ' Set the source worksheet and destination worksheets for each lab
     Set wsSource = ThisWorkbook.Sheets("main")
@@ -62,17 +63,26 @@ Sub StringMatchingLab22()
                         Case "(L1)", "(L-1)"
                             destRow = Application.match(timeValue, wsDestL1.Columns(1), 0)
                             If Not IsError(destRow) Then
-                                wsDestL1.Cells(destRow, col).Value = subject & labCode
+                                Set destCell = wsDestL1.Cells(destRow, col)
+                                destCell.Value = subject & labCode
+                                ApplyBlackBorders destCell
+                                AutoFitCell destCell ' Auto-fit the cell
                             End If
                         Case "(L2)", "(L-2)"
                             destRow = Application.match(timeValue, wsDestL2.Columns(1), 0)
                             If Not IsError(destRow) Then
-                                wsDestL2.Cells(destRow, col).Value = subject & labCode
+                                Set destCell = wsDestL2.Cells(destRow, col)
+                                destCell.Value = subject & labCode
+                                ApplyBlackBorders destCell
+                                AutoFitCell destCell ' Auto-fit the cell
                             End If
                         Case "(L3)", "(L-3)"
                             destRow = Application.match(timeValue, wsDestL3.Columns(1), 0)
                             If Not IsError(destRow) Then
-                                wsDestL3.Cells(destRow, col).Value = subject & labCode
+                                Set destCell = wsDestL3.Cells(destRow, col)
+                                destCell.Value = subject & labCode
+                                ApplyBlackBorders destCell
+                                AutoFitCell destCell ' Auto-fit the cell
                             End If
                     End Select
                 Next match
@@ -81,5 +91,41 @@ Sub StringMatchingLab22()
     Next cell
 
     MsgBox "Subjects have been added to their respective lab sheets based on time."
+End Sub
+
+' Subroutine to apply black borders to a cell
+Sub ApplyBlackBorders(ByVal destCell As Range)
+    With destCell.Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .Color = vbBlack
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With destCell.Borders(xlEdgeRight)
+        .LineStyle = xlContinuous
+        .Color = vbBlack
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With destCell.Borders(xlEdgeTop)
+        .LineStyle = xlContinuous
+        .Color = vbBlack
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With destCell.Borders(xlEdgeLeft)
+        .LineStyle = xlContinuous
+        .Color = vbBlack
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+End Sub
+
+' Subroutine to auto-fit a cell based on its content
+Sub AutoFitCell(ByVal destCell As Range)
+    ' Auto-fit column width to match the content
+    destCell.EntireColumn.AutoFit
+    ' Auto-fit row height to match the content
+    destCell.EntireRow.AutoFit
 End Sub
 
