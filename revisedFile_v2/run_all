@@ -1,7 +1,9 @@
+' Put Module names and Sub names in the order to run the files
 Sub RunAllModules()
     ' Call the subroutines from different modules
-   Call Module4.UnmergeAndRetainValuesInFixedRange
-   Call Module3.StringMatchingLec
-   Call Module1.StringMatchingLab
-   Call Module5.MergeSameValueCellsInFixedRange
+    Call unmerge.UnmergeAndRetainValuesInFixedRange
+    Call create.CreateAndCopyColumnASheetsForClassAndLab
+    Call lab.StringMatchingLab22
+    Call lec.StringMatchingLec
+    Call merge.MergeSameValueCellsInFixedRange
 End Sub
