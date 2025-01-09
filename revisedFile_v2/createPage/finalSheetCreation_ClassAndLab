@@ -9,7 +9,7 @@ Sub CreateAndCopyColumnASheetsForClassAndLab()
     Dim ws As Worksheet
     
     ' Array of values to exclude from sheet creation
-    excludedValues = Array("53", "54", "55", "L1", "L2", "L3", "64", "65", "66", "T")
+    excludedValues = Array("53", "54", "55", "L1", "L2", "L3", "L4", "L5", "L6", "64", "65", "66", "T")
     
     ' Loop through all sheets in the workbook
     For Each ws In ThisWorkbook.Sheets
@@ -52,4 +52,3 @@ Sub CreateAndCopyColumnASheetsForClassAndLab()
 
     MsgBox "Sheets have been created and data has been copied."
 End Sub
-
