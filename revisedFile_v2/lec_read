@@ -1,10 +1,9 @@
-Sub StringMatchingLec()
+Sub StringMatchingLec(initialSheets As String)
     Dim wsSource As Worksheet
     Dim wsDestL1 As Worksheet
     Dim wsDestL2 As Worksheet
     Dim wsDestL3 As Worksheet
     Dim cell As Range
-    Dim subjects As Variant
     Dim subject As Variant
     Dim timeValue As String
     Dim destRow As Variant
@@ -18,84 +17,93 @@ Sub StringMatchingLec()
     Dim labCode As String
     Dim destCell As Range
     Dim sourceA1Value As String ' Variable to hold the value of cell A1
+    Dim sheetInInitialSheets As Boolean
 
-    ' Set the source worksheet and destination worksheets for each lab
-    Set wsSource = ThisWorkbook.Sheets("main")
+    ' Set the destination worksheets for each lab
     Set wsDestL1 = ThisWorkbook.Sheets("64")
     Set wsDestL2 = ThisWorkbook.Sheets("65")
     Set wsDestL3 = ThisWorkbook.Sheets("66")
 
-    ' Get the value from A1 in the source sheet (I2 or whatever it is)
-    sourceA1Value = wsSource.Range("A1").Value
-    
     ' Initialize the regex object
     Set regex = CreateObject("VBScript.RegExp")
     regex.IgnoreCase = True
     regex.Global = True
     regex.Pattern = "(.*?)(\(\d{2}\))" ' Pattern to capture the subject and lab code (e.g., (64), (65), etc.)
 
-    ' Copy time values to destination sheets
-    wsDestL1.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).Value = wsSource.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).Value
-    wsDestL2.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).Value = wsSource.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).Value
-    wsDestL3.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).Value = wsSource.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).Value
-
-    ' Loop through each row in the source worksheet
-    For Each cell In wsSource.UsedRange.Rows
-        ' Get the time value (the first cell in the row)
-        timeValue = wsSource.Cells(cell.Row, 1).Value
+    ' Loop through each worksheet in the workbook
+    For Each wsSource In ThisWorkbook.Sheets
+        ' Check if the current sheet's name is in the initialSheets string
+        sheetInInitialSheets = InStr(1, initialSheets, wsSource.Name) > 0
         
-        ' Loop through columns B to H (2 to 8)
-        For col = 2 To 8 ' Columns B to H
-            ' Check if the cell in the current column is not empty
-            If wsSource.Cells(cell.Row, col).Value <> "" Then
-                ' Get the full content of the cell
-                fullSubject = wsSource.Cells(cell.Row, col).Value
+        ' Only process sheets that are found in initialSheets
+        If sheetInInitialSheets Then
+            ' Get the value from A1 in the source sheet (assuming it's the same for all)
+            sourceA1Value = wsSource.Range("A1").value
 
-                ' Find matches using regular expression for subjects with lab codes
-                Set matches = regex.Execute(fullSubject)
-                
-                ' If a match is found
-                For Each match In matches
-                    subject = Trim(match.SubMatches(0)) ' Extract the subject
-                    labCode = Trim(match.SubMatches(1)) ' Extract the lab code (e.g., (64), (65), etc.)
-                    
-                    ' Normalize the format for the lab code (e.g., remove space before parentheses)
-                    fullSubject = subject & labCode
+            ' Copy time values to destination sheets
+            wsDestL1.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).value = wsSource.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).value
+            wsDestL2.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).value = wsSource.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).value
+            wsDestL3.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).value = wsSource.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row).value
 
-                    ' Prepend the value from A1 in brackets to the full subject
-                    fullSubject = "(" & sourceA1Value & ") " & fullSubject
+            ' Loop through each row in the source worksheet
+            For Each cell In wsSource.UsedRange.Rows
+                ' Get the time value (the first cell in the row)
+                timeValue = wsSource.Cells(cell.Row, 1).value
 
-                    ' Determine the destination row for each lab code
-                    Select Case labCode
-                        Case "(64)"
-                            destRow = Application.match(timeValue, wsDestL1.Columns(1), 0)
-                            If Not IsError(destRow) Then
-                                Set destCell = wsDestL1.Cells(destRow, col)
-                                destCell.Value = "'" & fullSubject ' Preserve format with apostrophe
-                                ApplyBlackBorders destCell ' Apply black borders
-                                AutoFitCell destCell ' Auto-fit the cell
-                            End If
-                        Case "(65)"
-                            destRow = Application.match(timeValue, wsDestL2.Columns(1), 0)
-                            If Not IsError(destRow) Then
-                                Set destCell = wsDestL2.Cells(destRow, col)
-                                destCell.Value = "'" & fullSubject ' Preserve format with apostrophe
-                                ApplyBlackBorders destCell ' Apply black borders
-                                AutoFitCell destCell ' Auto-fit the cell
-                            End If
-                        Case "(66)"
-                            destRow = Application.match(timeValue, wsDestL3.Columns(1), 0)
-                            If Not IsError(destRow) Then
-                                Set destCell = wsDestL3.Cells(destRow, col)
-                                destCell.Value = "'" & fullSubject ' Preserve format with apostrophe
-                                ApplyBlackBorders destCell ' Apply black borders
-                                AutoFitCell destCell ' Auto-fit the cell
-                            End If
-                    End Select
-                Next match
-            End If
-        Next col
-    Next cell
+                ' Loop through columns B to H (2 to 8)
+                For col = 2 To 8 ' Columns B to H
+                    ' Check if the cell in the current column is not empty
+                    If wsSource.Cells(cell.Row, col).value <> "" Then
+                        ' Get the full content of the cell
+                        fullSubject = wsSource.Cells(cell.Row, col).value
+
+                        ' Find matches using regular expression for subjects with lab codes
+                        Set matches = regex.Execute(fullSubject)
+                        
+                        ' If a match is found
+                        For Each match In matches
+                            subject = Trim(match.SubMatches(0)) ' Extract the subject
+                            labCode = Trim(match.SubMatches(1)) ' Extract the lab code (e.g., (64), (65), etc.)
+                            
+                            ' Normalize the format for the lab code (e.g., remove space before parentheses)
+                            fullSubject = subject & labCode
+
+                            ' Prepend the value from A1 in brackets to the full subject
+                            fullSubject = "(" & sourceA1Value & ") " & fullSubject
+
+                            ' Determine the destination row for each lab code
+                            Select Case labCode
+                                Case "(64)"
+                                    destRow = Application.match(timeValue, wsDestL1.Columns(1), 0)
+                                    If Not IsError(destRow) Then
+                                        Set destCell = wsDestL1.Cells(destRow, col)
+                                        destCell.value = "'" & fullSubject ' Preserve format with apostrophe
+                                        ApplyBlackBorders destCell ' Apply black borders
+                                        AutoFitCell destCell ' Auto-fit the cell
+                                    End If
+                                Case "(65)"
+                                    destRow = Application.match(timeValue, wsDestL2.Columns(1), 0)
+                                    If Not IsError(destRow) Then
+                                        Set destCell = wsDestL2.Cells(destRow, col)
+                                        destCell.value = "'" & fullSubject ' Preserve format with apostrophe
+                                        ApplyBlackBorders destCell ' Apply black borders
+                                        AutoFitCell destCell ' Auto-fit the cell
+                                    End If
+                                Case "(66)"
+                                    destRow = Application.match(timeValue, wsDestL3.Columns(1), 0)
+                                    If Not IsError(destRow) Then
+                                        Set destCell = wsDestL3.Cells(destRow, col)
+                                        destCell.value = "'" & fullSubject ' Preserve format with apostrophe
+                                        ApplyBlackBorders destCell ' Apply black borders
+                                        AutoFitCell destCell ' Auto-fit the cell
+                                    End If
+                            End Select
+                        Next match
+                    End If
+                Next col
+            Next cell
+        End If
+    Next wsSource
 
     MsgBox "Subjects have been added to their respective lab sheets based on time."
 End Sub
