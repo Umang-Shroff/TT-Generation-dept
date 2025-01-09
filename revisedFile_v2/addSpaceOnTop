@@ -1,69 +1,64 @@
 Sub addSpaces()
-    Dim sheetNames As Variant
     Dim ws As Worksheet
     Dim lastRow As Long
     Dim lastCol As Long
     Dim rangeToShift As Range
     Dim cell As Range
-    Dim i As Long
     Dim currentCell As Range
     
-    ' Specify the sheet names to which this action should be applied
-    sheetNames = Array("main") ' Add your sheet names here
-    
-    ' Loop through each specified sheet
-    For i = LBound(sheetNames) To UBound(sheetNames)
-        ' Set the worksheet to the current sheet name
-        Set ws = ThisWorkbook.Sheets(sheetNames(i))
-        
-        ' Find the last row and last column with data on the sheet
+    ' Loop through each sheet in the workbook
+    For Each ws In ThisWorkbook.Sheets
+        ' Check if the first column of the sheet has any data (starting from A1)
         lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
-        lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
         
-        ' Remove borders from the entire sheet
-        ws.Cells.Borders.LineStyle = xlNone
-        
-        ' Set the range to be shifted (entire data range)
-        Set rangeToShift = ws.Range(ws.Cells(1, 1), ws.Cells(lastRow, lastCol))
-        
-        ' Shift the data down by 5 rows
-        rangeToShift.Offset(5, 0).value = rangeToShift.value
-        
-        ' Optional: Clear the top 5 rows that were just moved down
-        ws.Rows("1:5").ClearContents
-        
-        ' Reapply borders to all cells that hold values after the shift
-        For Each currentCell In ws.UsedRange
-            If Not IsEmpty(currentCell.value) Then
-                With currentCell.Borders(xlEdgeBottom)
-                    .LineStyle = xlContinuous
-                    .Color = vbBlack
-                    .TintAndShade = 0
-                    .Weight = xlThin
-                End With
-                With currentCell.Borders(xlEdgeRight)
-                    .LineStyle = xlContinuous
-                    .Color = vbBlack
-                    .TintAndShade = 0
-                    .Weight = xlThin
-                End With
-                With currentCell.Borders(xlEdgeTop)
-                    .LineStyle = xlContinuous
-                    .Color = vbBlack
-                    .TintAndShade = 0
-                    .Weight = xlThin
-                End With
-                With currentCell.Borders(xlEdgeLeft)
-                    .LineStyle = xlContinuous
-                    .Color = vbBlack
-                    .TintAndShade = 0
-                    .Weight = xlThin
-                End With
-            End If
-        Next currentCell
-        
-    Next i
+        ' Only proceed if there is data starting from A1 (i.e., lastRow > 1)
+        If lastRow > 1 Then
+            ' Find the last column with data on the sheet
+            lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+            
+            ' Remove borders from the entire sheet
+            ws.Cells.Borders.LineStyle = xlNone
+            
+            ' Set the range to be shifted (entire data range)
+            Set rangeToShift = ws.Range(ws.Cells(1, 1), ws.Cells(lastRow, lastCol))
+            
+            ' Shift the data down by 5 rows
+            rangeToShift.Offset(5, 0).Value = rangeToShift.Value
+            
+            ' Optional: Clear the top 5 rows that were just moved down
+            ws.Rows("1:5").ClearContents
+            
+            ' Reapply borders to all cells that hold values after the shift
+            For Each currentCell In ws.UsedRange
+                If Not IsEmpty(currentCell.Value) Then
+                    With currentCell.Borders(xlEdgeBottom)
+                        .LineStyle = xlContinuous
+                        .Color = vbBlack
+                        .TintAndShade = 0
+                        .Weight = xlThin
+                    End With
+                    With currentCell.Borders(xlEdgeRight)
+                        .LineStyle = xlContinuous
+                        .Color = vbBlack
+                        .TintAndShade = 0
+                        .Weight = xlThin
+                    End With
+                    With currentCell.Borders(xlEdgeTop)
+                        .LineStyle = xlContinuous
+                        .Color = vbBlack
+                        .TintAndShade = 0
+                        .Weight = xlThin
+                    End With
+                    With currentCell.Borders(xlEdgeLeft)
+                        .LineStyle = xlContinuous
+                        .Color = vbBlack
+                        .TintAndShade = 0
+                        .Weight = xlThin
+                    End With
+                End If
+            Next currentCell
+        End If
+    Next ws
     
-    MsgBox "Data has been shifted down by 5 rows and borders reapplied."
+    MsgBox "Data has been shifted down by 5 rows and borders reapplied where applicable."
 End Sub
-
