@@ -1,5 +1,5 @@
 Sub copyValuesToSheets()
-    Dim wsSource As Worksheet
+    Dim ws As Worksheet
     Dim cell As Range
     Dim regex As Object
     Dim matchCollection As Object
@@ -8,51 +8,107 @@ Sub copyValuesToSheets()
     Dim newSheet As Worksheet
     Dim excludedValues As Variant
     Dim destRow As Long, destCol As Long
-    Dim found As Boolean
+    Dim sourceA1Value As String
+    Dim destCell As Range
+    Dim cellContent As String
+    Dim sourceSheetName As String ' Variable to hold the current sheet name
     
-    ' Set the source sheet directly in the code
-    Set wsSource = ThisWorkbook.Sheets("main") ' Specify the sheet name here
-    
-    ' Array of values to exclude from sheet creation
+    ' Array of values to exclude from sheet processing
     excludedValues = Array("53", "54", "55", "L1", "L2", "L3", "64", "65", "66", "T")
-    
+
     ' Create a regular expression object for pattern matching
     Set regex = CreateObject("VBScript.RegExp")
     regex.IgnoreCase = True
     regex.Global = True
     regex.Pattern = "\(([^)]+)\)" ' This will match text inside brackets
-    
-    ' Now, move the data from the "main" sheet to the respective sheets based on unique values found
-    For Each cell In wsSource.UsedRange
-        If cell.HasFormula = False Then ' Skip cells with formulas
-            ' Apply regex to find matches in the cell content
-            Set matchCollection = regex.Execute(cell.value)
-            ' Loop through each match found
-            For Each match In matchCollection
-                ' Extract the value inside parentheses
-                sheetName = match.SubMatches(0)
-                
-                ' Check if the sheetName is not in the excluded values
-                If IsError(Application.match(sheetName, excludedValues, 0)) Then
-                    ' Check if the sheet already exists
-                    On Error Resume Next
-                    Set newSheet = ThisWorkbook.Sheets(sheetName)
-                    On Error GoTo 0
+
+    ' Loop through all sheets in the workbook
+    For Each ws In ThisWorkbook.Sheets
+        ' Skip sheets named "53", "54", "55", "L1", "L2", "L3", "64", "65", "66", "T"
+        If IsError(Application.match(ws.Name, excludedValues, 0)) Then
+            ' Get the sheet name
+            sourceSheetName = ws.Name
+
+            ' Loop through each cell in the used range of the current worksheet
+            For Each cell In ws.UsedRange
+                If cell.HasFormula = False Then ' Skip cells with formulas
+                    ' Apply regex to find matches in the cell content
+                    Set matchCollection = regex.Execute(cell.value)
                     
-                    ' If the sheet exists, transfer the data
-                    If Not newSheet Is Nothing Then
-                        ' Find the corresponding cell in the new sheet
-                        destRow = cell.Row
-                        destCol = cell.Column
+                    ' Loop through each match found
+                    For Each match In matchCollection
+                        ' Extract the value inside parentheses
+                        sheetName = match.SubMatches(0)
                         
-                        ' Copy the cell value to the corresponding cell in the new sheet
-                        newSheet.Cells(destRow, destCol).value = cell.value
-                    End If
+                        ' Check if the sheetName is not in the excluded values
+                        If IsError(Application.match(sheetName, excludedValues, 0)) Then
+                            ' Check if the sheet already exists
+                            On Error Resume Next
+                            Set newSheet = ThisWorkbook.Sheets(sheetName)
+                            On Error GoTo 0
+                            
+                            ' If the sheet exists, transfer the data
+                            If Not newSheet Is Nothing Then
+                                ' Prepend the sheet name to the cell value
+                                cellContent = "(" & sourceSheetName & ") " & cell.value
+                                
+                                ' Find the corresponding cell in the new sheet
+                                destRow = cell.Row
+                                destCol = cell.Column
+                                
+                                ' Copy the cell value to the corresponding cell in the new sheet
+                                Set destCell = newSheet.Cells(destRow, destCol)
+                                destCell.value = cellContent
+                                
+                                ' Apply black borders to the cell
+                                ApplyBlackBorders destCell
+                                
+                                ' Auto-fit the cell (both row and column)
+                                AutoFitCell destCell
+                            End If
+                        End If
+                    Next match
                 End If
-            Next match
+            Next cell
         End If
-    Next cell
-    
-    MsgBox "Data has been transferred to the respective sheets."
+    Next ws
+
+    MsgBox "Data has been transferred to the respective sheets and formatted."
+End Sub
+
+' Subroutine to apply black borders to a cell
+Sub ApplyBlackBorders(ByVal destCell As Range)
+    With destCell.Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .Color = vbBlack
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With destCell.Borders(xlEdgeRight)
+        .LineStyle = xlContinuous
+        .Color = vbBlack
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With destCell.Borders(xlEdgeTop)
+        .LineStyle = xlContinuous
+        .Color = vbBlack
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With destCell.Borders(xlEdgeLeft)
+        .LineStyle = xlContinuous
+        .Color = vbBlack
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+End Sub
+
+' Subroutine to auto-fit a cell based on its content
+Sub AutoFitCell(ByVal destCell As Range)
+    ' Auto-fit column width to match the content
+    destCell.EntireColumn.AutoFit
+    ' Auto-fit row height to match the content
+    destCell.EntireRow.AutoFit
 End Sub
 
