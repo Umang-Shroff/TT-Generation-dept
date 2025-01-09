@@ -1,0 +1,60 @@
+Sub addBorders(initialSheets As String)
+    Dim ws As Worksheet
+    Dim cell As Range
+    Dim excludedSheets As Boolean
+    Dim initialSheetArray As Variant
+    Dim sheetInInitialSheets As Boolean
+
+    ' Convert the initialSheets string to an array by splitting on commas
+    initialSheetArray = Split(initialSheets, ",")
+
+    ' Loop through all sheets in the workbook
+    For Each ws In ThisWorkbook.Sheets
+        ' Check if the current sheet is not in the initialSheets list
+        sheetInInitialSheets = IsInArray(ws.Name, initialSheetArray)
+        
+        ' Skip the sheets in initialSheets
+        If Not sheetInInitialSheets Then
+            ' Loop through each cell in the used range of the current worksheet
+            For Each cell In ws.UsedRange
+                If Not IsEmpty(cell.value) Then ' Skip empty cells
+                    ' Add borders to the current cell
+                    With cell.Borders(xlEdgeLeft)
+                        .LineStyle = xlContinuous
+                        .ColorIndex = 0 ' Black
+                        .TintAndShade = 0
+                        .Weight = xlThin
+                    End With
+                    With cell.Borders(xlEdgeTop)
+                        .LineStyle = xlContinuous
+                        .ColorIndex = 0 ' Black
+                        .TintAndShade = 0
+                        .Weight = xlThin
+                    End With
+                    With cell.Borders(xlEdgeRight)
+                        .LineStyle = xlContinuous
+                        .ColorIndex = 0 ' Black
+                        .TintAndShade = 0
+                        .Weight = xlThin
+                    End With
+                    With cell.Borders(xlEdgeBottom)
+                        .LineStyle = xlContinuous
+                        .ColorIndex = 0 ' Black
+                        .TintAndShade = 0
+                        .Weight = xlThin
+                    End With
+                End If
+            Next cell
+        End If
+    Next ws
+
+    MsgBox "Borders have been added to the relevant cells in all sheets."
+End Sub
+
+' Helper function to check if a sheet name is in the initialSheets array
+Function IsInArray(val As String, arr As Variant) As Boolean
+    On Error Resume Next
+    IsInArray = (UBound(Filter(arr, val)) > -1)
+    On Error GoTo 0
+End Function
+
