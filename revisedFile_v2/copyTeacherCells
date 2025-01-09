@@ -1,4 +1,4 @@
-Sub copyValuesToSheets()
+Sub copyValuesToSheets(initialSheets As String)
     Dim ws As Worksheet
     Dim cell As Range
     Dim regex As Object
@@ -12,7 +12,8 @@ Sub copyValuesToSheets()
     Dim destCell As Range
     Dim cellContent As String
     Dim sourceSheetName As String ' Variable to hold the current sheet name
-    
+    Dim sheetInInitialSheets As Boolean
+
     ' Array of values to exclude from sheet processing
     excludedValues = Array("53", "54", "55", "L1", "L2", "L3", "L4", "L5", "L6", "64", "65", "66", "T")
 
@@ -24,8 +25,11 @@ Sub copyValuesToSheets()
 
     ' Loop through all sheets in the workbook
     For Each ws In ThisWorkbook.Sheets
-        ' Skip sheets named "53", "54", "55", "L1", "L2", "L3", "64", "65", "66", "T"
-        If IsError(Application.match(ws.Name, excludedValues, 0)) Then
+        ' Skip sheets that are not in the initialSheets list
+        sheetInInitialSheets = InStr(1, initialSheets, ws.Name) > 0
+        
+        ' Only process sheets that are found in initialSheets
+        If sheetInInitialSheets Then
             ' Get the sheet name
             sourceSheetName = ws.Name
 
@@ -47,24 +51,23 @@ Sub copyValuesToSheets()
                             Set newSheet = ThisWorkbook.Sheets(sheetName)
                             On Error GoTo 0
                             
+
                             ' If the sheet exists, transfer the data
                             If Not newSheet Is Nothing Then
-                                ' Prepend the sheet name to the cell value
+                                ' Prepend the source sheet's name to the cell value
                                 cellContent = "(" & sourceSheetName & ") " & cell.value
                                 
                                 ' Find the corresponding cell in the new sheet
                                 destRow = cell.Row
                                 destCol = cell.Column
-                                
+                                 
                                 ' Copy the cell value to the corresponding cell in the new sheet
                                 Set destCell = newSheet.Cells(destRow, destCol)
                                 destCell.value = cellContent
                                 
-                                ' Apply black borders to the cell
-                                ApplyBlackBorders destCell
-                                
-                                ' Auto-fit the cell (both row and column)
-                                AutoFitCell destCell
+                                ' Apply AutoFit to the copied cell's column and row
+                                newSheet.Columns(destCol).AutoFit
+                                newSheet.Rows(destRow).AutoFit
                             End If
                         End If
                     Next match
@@ -74,41 +77,5 @@ Sub copyValuesToSheets()
     Next ws
 
     MsgBox "Data has been transferred to the respective sheets and formatted."
-End Sub
-
-' Subroutine to apply black borders to a cell
-Sub ApplyBlackBorders(ByVal destCell As Range)
-    With destCell.Borders(xlEdgeBottom)
-        .LineStyle = xlContinuous
-        .Color = vbBlack
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With destCell.Borders(xlEdgeRight)
-        .LineStyle = xlContinuous
-        .Color = vbBlack
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With destCell.Borders(xlEdgeTop)
-        .LineStyle = xlContinuous
-        .Color = vbBlack
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-    With destCell.Borders(xlEdgeLeft)
-        .LineStyle = xlContinuous
-        .Color = vbBlack
-        .TintAndShade = 0
-        .Weight = xlThin
-    End With
-End Sub
-
-' Subroutine to auto-fit a cell based on its content
-Sub AutoFitCell(ByVal destCell As Range)
-    ' Auto-fit column width to match the content
-    destCell.EntireColumn.AutoFit
-    ' Auto-fit row height to match the content
-    destCell.EntireRow.AutoFit
 End Sub
 
