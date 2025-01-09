@@ -14,7 +14,7 @@ Sub copyValuesToSheets()
     Dim sourceSheetName As String ' Variable to hold the current sheet name
     
     ' Array of values to exclude from sheet processing
-    excludedValues = Array("53", "54", "55", "L1", "L2", "L3", "64", "65", "66", "T")
+    excludedValues = Array("53", "54", "55", "L1", "L2", "L3", "L4", "L5", "L6", "64", "65", "66", "T")
 
     ' Create a regular expression object for pattern matching
     Set regex = CreateObject("VBScript.RegExp")
