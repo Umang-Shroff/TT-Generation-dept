@@ -16,11 +16,9 @@ Sub RunAllModules()
     Call unmerge.UnmergeAndRetainValuesOnAllSheets
     Call create.CreateAndCopyColumnASheetsForClassAndLab
     Call createTeachSheets.createSheetsFromUniqueValues
-    Call readLab.StringMatchingLab22
-    Call readLec.StringMatchingLec
+    Call readLab.StringMatchingLab22(initialSheets)
+    Call readLec.StringMatchingLec(initialSheets)
     Call copyTeachValues.copyValuesToSheets(initialSheets)
     Call addBorder.addBorders(initialSheets)
     Call merge.MergeSameValueCellsOnAllSheets
 End Sub
-
-
