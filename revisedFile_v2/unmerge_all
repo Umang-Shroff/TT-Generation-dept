@@ -1,4 +1,4 @@
-Sub UnmergeAndRetainValuesInFixedRange()
+Sub UnmergeAndRetainValuesOnAllSheets()
     Dim cell As Range
     Dim ws As Worksheet
     Dim mergeArea As Range
@@ -7,31 +7,32 @@ Sub UnmergeAndRetainValuesInFixedRange()
     Dim i As Integer
     Dim fixedRange As Range
 
-    ' Set the active worksheet
-    Set ws = ActiveSheet
+    ' Loop through all sheets in the workbook
+    For Each ws In ThisWorkbook.Sheets
+        ' Initialize the array of strings for ranges
+        rangeArray = Array("B1:B25", "C1:C25", "D1:D25", "E1:E25", "F1:F25", "G1:G25")
 
-    ' Initialize the array of strings for ranges
-    rangeArray = Array("B1:B25", "C1:C25", "D1:D25", "E1:E25", "F1:F25", "G1:G25")
+        ' Loop through the indexes of the array
+        For i = LBound(rangeArray) To UBound(rangeArray)
+            ' Set the fixedRange based on the current index of rangeArray
+            Set fixedRange = ws.Range(rangeArray(i))
 
-    ' Loop through the indexes of the array
-    For i = LBound(rangeArray) To UBound(rangeArray)
-        ' Set the fixedRange based on the current index of rangeArray
-        Set fixedRange = ws.Range(rangeArray(i))
+            ' Loop through each cell in the fixed range
+            For Each cell In fixedRange
+                ' Check if the cell is the top-left cell of a merged area
+                If cell.MergeCells And cell.Address = cell.mergeArea.Cells(1, 1).Address Then
+                    ' Store the value of the merged cell
+                    mergeValue = cell.value
+                    ' Unmerge the cells
+                    Set mergeArea = cell.mergeArea
+                    mergeArea.unmerge
+                    ' Set the value of all unmerged cells to the stored value
+                    mergeArea.value = mergeValue
+                End If
+            Next cell
+        Next i
+    Next ws
 
-        ' Loop through each cell in the fixed range
-        For Each cell In fixedRange
-            ' Check if the cell is the top-left cell of a merged area
-            If cell.MergeCells And cell.Address = cell.mergeArea.Cells(1, 1).Address Then
-                ' Store the value of the merged cell
-                mergeValue = cell.Value
-                ' Unmerge the cells
-                Set mergeArea = cell.mergeArea
-                mergeArea.unmerge
-                ' Set the value of all unmerged cells to the stored value
-                mergeArea.Value = mergeValue
-            End If
-        Next cell
-    Next i
-
-    MsgBox "Cells in the specified ranges have been unmerged and values retained."
+    MsgBox "Cells in the specified ranges have been unmerged and values retained on all sheets."
 End Sub
+
