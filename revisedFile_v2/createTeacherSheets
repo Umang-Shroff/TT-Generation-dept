@@ -11,9 +11,8 @@ Sub createSheetsFromUniqueValues()
     Dim lastRow As Long
     Dim lastCol As Long
     Dim excludedValues As Variant
-    
-    ' Set the source sheet directly in the code
-    Set wsSource = ThisWorkbook.Sheets("SY-I1") ' Specify the sheet name here
+    Dim ws As Worksheet
+    Dim sourceWs As Worksheet ' Variable to store the source worksheet
     
     ' Array of values to exclude from sheet creation
     excludedValues = Array("53", "54", "55", "L1", "L2", "L3", "64", "65", "66", "T")
@@ -27,20 +26,29 @@ Sub createSheetsFromUniqueValues()
     regex.Global = True
     regex.Pattern = "\(([^)]+)\)" ' This will match text inside brackets
     
-    ' Loop through each cell in the specified source sheet to gather unique values
-    For Each cell In wsSource.UsedRange
-        If cell.HasFormula = False Then ' Skip cells with formulas
-            ' Apply regex to find matches in the cell content
-            Set matchCollection = regex.Execute(cell.value)
-            ' Loop through each match found
-            For Each match In matchCollection
-                ' Add the matched string to the uniqueValues collection if not already present
-                On Error Resume Next ' Ignore error if the value already exists
-                uniqueValues.Add match.SubMatches(0), CStr(match.SubMatches(0))
-                On Error GoTo 0 ' Reset error handling
-            Next match
+    ' Loop through all sheets in the workbook
+    For Each ws In ThisWorkbook.Sheets
+        ' Skip the sheets that are in the excluded list
+        If IsError(Application.match(ws.Name, excludedValues, 0)) Then
+            ' Store the source worksheet
+            Set sourceWs = ws
+            
+            ' Loop through each cell in the current sheet to gather unique values
+            For Each cell In ws.UsedRange
+                If cell.HasFormula = False Then ' Skip cells with formulas
+                    ' Apply regex to find matches in the cell content
+                    Set matchCollection = regex.Execute(cell.value)
+                    ' Loop through each match found
+                    For Each match In matchCollection
+                        ' Add the matched string to the uniqueValues collection if not already present
+                        On Error Resume Next ' Ignore error if the value already exists
+                        uniqueValues.Add match.SubMatches(0), CStr(match.SubMatches(0))
+                        On Error GoTo 0 ' Reset error handling
+                    Next match
+                End If
+            Next cell
         End If
-    Next cell
+    Next ws
     
     ' Create a new sheet for each unique value found (excluding the excluded values)
     For Each value In uniqueValues
@@ -59,13 +67,13 @@ Sub createSheetsFromUniqueValues()
                 Set newSheet = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
                 newSheet.Name = sheetName
                 
-                ' Find the last row and column with data in the source sheet
-                lastRow = wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row
-                lastCol = wsSource.Cells(1, wsSource.Columns.Count).End(xlToLeft).Column
+                ' Use the previously stored sourceWs for the correct worksheet
+                lastRow = sourceWs.Cells(sourceWs.Rows.Count, 1).End(xlUp).Row
+                lastCol = sourceWs.Cells(1, sourceWs.Columns.Count).End(xlToLeft).Column
                 
                 ' Only copy column A and row 1 (excluding cell A1)
-                wsSource.Range("A1:A" & lastRow).Copy newSheet.Range("A1")
-                wsSource.Rows(1).Copy
+                sourceWs.Range("A1:A" & lastRow).Copy newSheet.Range("A1")
+                sourceWs.Rows(1).Copy
                 newSheet.Rows(1).PasteSpecial Paste:=xlPasteValues
                 newSheet.Cells(1, 1).ClearContents ' Clear content in A1 of the new sheet
                 
