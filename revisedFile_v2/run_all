@@ -1,15 +1,26 @@
-' Put Module names and Sub names in the order to run the files
 Sub RunAllModules()
-    ' Call the subroutines from different modules
+    Dim ws As Worksheet
+    Dim initialSheets As String
+    Dim sheetName As String
+
+    ' Initialize an empty string to store the sheet names
+    initialSheets = ""
+
+    ' Loop through each worksheet and append its name to the initialSheets variable
+    For Each ws In ThisWorkbook.Sheets
+        sheetName = ws.Name
+        initialSheets = initialSheets & sheetName & vbCrLf ' New line after each sheet name
+    Next ws
+
+    ' Now, call the subroutines from different modules and pass initialSheets as parameter
     Call unmerge.UnmergeAndRetainValuesOnAllSheets
     Call create.CreateAndCopyColumnASheetsForClassAndLab
     Call createTeachSheets.createSheetsFromUniqueValues
     Call readLab.StringMatchingLab22
     Call readLec.StringMatchingLec
-    Call copyTeachValues.copyValuesToSheets
+    Call copyTeachValues.copyValuesToSheets(initialSheets)
+    Call addBorder.addBorders(initialSheets)
     Call merge.MergeSameValueCellsOnAllSheets
 End Sub
-
-
 
 
