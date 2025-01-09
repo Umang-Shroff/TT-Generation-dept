@@ -1,54 +1,88 @@
-Sub CreateAndCopyColumnASheetsForClassAndLab()
-    Dim sheetNames As Variant
-    Dim sheetName As Variant
-    Dim sourceSheet As Worksheet
+Sub CreateSheets(initialSheets As String)
+    Dim ws As Worksheet
     Dim newSheet As Worksheet
+    Dim cell As Range
+    Dim initialSheetArray() As String
+    Dim sheetName As Variant ' Changed to Variant for For Each loop
+    Dim valueToCheck As Variant
+    Dim valuesToCheck As Variant
+    Dim foundValues As Collection
     Dim lastRow As Long
     Dim lastCol As Long
-    Dim excludedValues As Variant
-    Dim ws As Worksheet
-    
-    ' Array of values to exclude from sheet creation
-    excludedValues = Array("53", "54", "55", "L1", "L2", "L3", "L4", "L5", "L6", "64", "65", "66", "T")
-    
-    ' Loop through all sheets in the workbook
-    For Each ws In ThisWorkbook.Sheets
-        ' Skip the sheets that are in the excluded list
-        If IsError(Application.match(ws.Name, excludedValues, 0)) Then
-            ' Get the last row in column A
-            lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
-            
-            ' Get the last used column in the source sheet
-            lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
-            
-            ' Loop through the array and create new sheets
-            For Each sheetName In Array("64", "65", "66", "L1", "L2", "L3")
-                ' Check if the sheet already exists
-                On Error Resume Next
-                If Not Evaluate("ISREF('" & sheetName & "'!A1)") Then
-                    ' Create a new sheet and set its name
-                    Set newSheet = Sheets.Add(After:=Sheets(Sheets.Count))
-                    newSheet.Name = sheetName
-                    
-                    ' Copy column A data from source sheet to new sheet (leaving A1 blank)
-                    ws.Range("A2:A" & lastRow).Copy newSheet.Range("A2")
-                    
-                    ' Copy entire row 1 (headers) from source sheet to new sheet (excluding A1)
-                    ws.Rows(1).Copy
-                    newSheet.Rows(1).PasteSpecial Paste:=xlPasteValues
-                    newSheet.Cells(1, 1).ClearContents ' Clear content in A1 of the new sheet
-                    
-                    ' Autofit columns to adjust for content
-                    newSheet.Columns.AutoFit
-                    
-                    ' Apply borders only to row 1 and column A
-                    newSheet.Range("A1:A" & lastRow).Borders.LineStyle = xlContinuous ' Borders for column A
-                    newSheet.Range("A1:" & newSheet.Cells(1, lastCol).Address).Borders.LineStyle = xlContinuous ' Borders for row 1
-                End If
-                On Error GoTo 0
-            Next sheetName
-        End If
-    Next ws
+    Dim newSheetName As String
 
-    MsgBox "Sheets have been created and data has been copied."
+    ' Define the values to check for in the sheets
+    valuesToCheck = Array("53", "54", "55", "64", "65", "66", "L1", "L2", "L3", "L4", "L5", "L6")
+    
+    ' Initialize a collection to store found sheet names (avoiding duplicates)
+    Set foundValues = New Collection
+
+    ' Split the initialSheets string into an array of sheet names
+    initialSheetArray = Split(initialSheets, vbCrLf)
+
+    ' Loop through each sheet name in initialSheets
+    For Each sheetName In initialSheetArray
+        sheetName = Trim(sheetName)
+        
+        ' Skip empty sheet names
+        If Len(sheetName) > 0 Then
+            ' Loop through each worksheet in the workbook
+            On Error Resume Next
+            Set ws = ThisWorkbook.Sheets(sheetName)
+            On Error GoTo 0
+            
+            ' Continue if the sheet exists
+            If Not ws Is Nothing Then
+                ' Get the last used row in column A
+                lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+                lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+                
+                ' Loop through each cell in the used range of the current sheet
+                For Each cell In ws.UsedRange
+                    ' Check if the cell contains any of the specified values
+                    For Each valueToCheck In valuesToCheck
+                        If InStr(1, cell.value, valueToCheck, vbTextCompare) > 0 Then
+                            ' If the value is found and hasn't been added before, create a new sheet
+                            On Error Resume Next
+                            newSheetName = valueToCheck
+                            foundValues.Add newSheetName, newSheetName ' Add unique values only
+                            On Error GoTo 0
+                            
+                            ' Check if this sheet has already been created
+                            If IsSheetExists(newSheetName) = False Then
+                                ' Create the new sheet
+                                Set newSheet = Sheets.Add(After:=Sheets(Sheets.Count))
+                                newSheet.Name = newSheetName
+                                
+                                ' Copy column A and row 1 from the source sheet to the new sheet
+                                ws.Range("A2:A" & lastRow).Copy newSheet.Range("A2")
+                    
+                                ' Copy entire row 1 (headers) from source sheet to new sheet (excluding A1)
+                                ws.Rows(1).Copy
+                                newSheet.Rows(1).PasteSpecial Paste:=xlPasteValues
+                                newSheet.Cells(1, 1).ClearContents '
+                                
+                                ' Autofit the columns in the new sheet
+                                newSheet.Columns.AutoFit
+                                
+                                ' Apply borders only to row 1 and column A
+                                newSheet.Range("A1:A" & lastRow).Borders.LineStyle = xlContinuous ' Borders for column A
+                                newSheet.Range("A1:" & newSheet.Cells(1, lastCol).Address).Borders.LineStyle = xlContinuous ' Borders for row 1
+                            End If
+                        End If
+                    Next valueToCheck
+                Next cell
+            End If
+        End If
+    Next sheetName
+
+    MsgBox "Sheets have been created based on the values found in the initial sheets."
 End Sub
+
+' Helper function to check if a sheet exists
+Function IsSheetExists(sheetName As String) As Boolean
+    On Error Resume Next
+    IsSheetExists = Not ThisWorkbook.Sheets(sheetName) Is Nothing
+    On Error GoTo 0
+End Function
+
