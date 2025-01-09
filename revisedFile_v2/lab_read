@@ -1,4 +1,4 @@
-Sub StringMatchingLab22()
+Sub StringMatchingLab22(initialSheets As String)
     Dim wsSource As Worksheet
     Dim wsDestL1 As Worksheet
     Dim wsDestL2 As Worksheet
@@ -16,6 +16,7 @@ Sub StringMatchingLab22()
     Dim labCode As String
     Dim destCell As Range
     Dim sourceSheetName As String ' Variable to hold the current sheet name
+    Dim sheetInInitialSheets As Boolean
 
     ' Set the destination worksheets for each lab
     Set wsDestL1 = ThisWorkbook.Sheets("L1")
@@ -32,7 +33,10 @@ Sub StringMatchingLab22()
     ' Loop through each worksheet in the workbook
     For Each ws In ThisWorkbook.Sheets
         ' Skip sheets named "64", "65", "66", "L1", "L2", and "L3"
-        If ws.Name <> "64" And ws.Name <> "65" And ws.Name <> "66" And ws.Name <> "L1" And ws.Name <> "L2" And ws.Name <> "L3" Then
+        sheetInInitialSheets = InStr(1, initialSheets, ws.Name) > 0
+
+        ' Only process sheets that are found in initialSheets
+        If sheetInInitialSheets Then
             ' Get the sheet name
             sourceSheetName = ws.Name
 
@@ -65,8 +69,10 @@ Sub StringMatchingLab22()
                             subject = Trim(match.SubMatches(0)) ' Extract the subject
                             labCode = Trim(match.SubMatches(1)) ' Extract the lab code (e.g., (L1), (L-1), etc.)
 
-                            ' Prepend the sheet name to the subject
-                            subject = "(" & sourceSheetName & ") " & subject
+                            ' Prepend the sheet name to the subject only if the sheet is in the initialSheets list
+                            If sheetInInitialSheets Then
+                                subject = "(" & sourceSheetName & ") " & subject
+                            End If
 
                             ' Determine the destination row for each lab code
                             Select Case labCode
