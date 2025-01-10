@@ -1,4 +1,4 @@
-Sub ReadLecAndLab(initialSheets As String)
+Sub CreateAndReadLecture(initialSheets As String)
     Dim wsSource As Worksheet
     Dim wsDest As Worksheet
     Dim cell As Range
