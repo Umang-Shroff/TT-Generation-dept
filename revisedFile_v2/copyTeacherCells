@@ -24,7 +24,7 @@ Sub copyValuesToSheets(initialSheets As String)
     regex.Pattern = "\(([^)]+)\)" ' This will match text inside brackets
 
     ' Loop through all sheets in the workbook
-    For Each ws In ThisWorkbook.Sheets
+    For Each ws In ThisWorkbook.sheets
         ' Skip sheets that are not in the initialSheets list
         sheetInInitialSheets = InStr(1, initialSheets, ws.Name) > 0
         
@@ -42,13 +42,13 @@ Sub copyValuesToSheets(initialSheets As String)
                     ' Loop through each match found
                     For Each match In matchCollection
                         ' Extract the value inside parentheses
-                        sheetName = match.SubMatches(0)
+                        sheetName = match.Submatches(0)
                         
                         ' Check if the sheetName is not in the excluded values
                         If IsError(Application.match(sheetName, excludedValues, 0)) Then
                             ' Check if the sheet already exists
                             On Error Resume Next
-                            Set newSheet = ThisWorkbook.Sheets(sheetName)
+                            Set newSheet = ThisWorkbook.sheets(sheetName)
                             On Error GoTo 0
                             
 
