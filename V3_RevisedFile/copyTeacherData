@@ -1,0 +1,95 @@
+Sub copyValuesToSheets(initialSheets As String)
+    Dim ws As Worksheet
+    Dim cell As Range
+    Dim regex As Object
+    Dim matchCollection As Object
+    Dim match As Variant
+    Dim sheetName As String
+    Dim newSheet As Worksheet
+    Dim excludedValues As Variant
+    Dim destRow As Long, destCol As Long
+    Dim sourceA1Value As String
+    Dim destCell As Range
+    Dim cellContent As String
+    Dim sourceSheetName As String ' Variable to hold the current sheet name
+    Dim sheetInInitialSheets As Boolean
+
+    ' Array of values to exclude from sheet processing
+    excludedValues = Array("T") ' Excluding the sheet "T" only, as you specified in the previous logic
+
+    ' Create a regular expression object for pattern matching
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.IgnoreCase = True
+    regex.Global = True
+    regex.Pattern = "\(([^)]+)\)" ' This will match text inside brackets
+
+    ' Loop through all sheets in the workbook
+    For Each ws In ThisWorkbook.sheets
+        ' Skip sheets that are not in the initialSheets list
+        sheetInInitialSheets = InStr(1, initialSheets, ws.Name) > 0
+        
+        ' Only process sheets that are found in initialSheets
+        If sheetInInitialSheets Then
+            ' Get the sheet name
+            sourceSheetName = ws.Name
+
+            ' Loop through each cell in the used range of the current worksheet
+            For Each cell In ws.UsedRange
+                If cell.HasFormula = False Then ' Skip cells with formulas
+                    ' Apply regex to find matches in the cell content
+                    Set matchCollection = regex.Execute(cell.value)
+                    
+                    ' Loop through each match found
+                    For Each match In matchCollection
+                        ' Extract the value inside parentheses
+                        sheetName = match.Submatches(0)
+                        
+                        ' Check if the sheetName is not in the excluded values and is strictly non-numeric
+                        If IsError(Application.match(sheetName, excludedValues, 0)) Then
+                            ' Check if the sheetName contains only non-numeric characters
+                            If Not ContainsDigits(sheetName) Then
+                                ' Check if the sheet already exists
+                                On Error Resume Next
+                                Set newSheet = ThisWorkbook.sheets(sheetName)
+                                On Error GoTo 0
+                                
+                                ' If the sheet exists, transfer the data
+                                If Not newSheet Is Nothing Then
+                                    ' Prepend the source sheet's name to the cell value
+                                    cellContent = "(" & sourceSheetName & ") " & cell.value
+                                    
+                                    ' Find the corresponding cell in the new sheet
+                                    destRow = cell.Row
+                                    destCol = cell.Column
+                                     
+                                    ' Copy the cell value to the corresponding cell in the new sheet
+                                    Set destCell = newSheet.Cells(destRow, destCol)
+                                    destCell.value = cellContent
+                                    
+                                    ' Apply AutoFit to the copied cell's column and row
+                                    newSheet.Columns(destCol).AutoFit
+                                    newSheet.Rows(destRow).AutoFit
+                                End If
+                            End If
+                        End If
+                    Next match
+                End If
+            Next cell
+        End If
+    Next ws
+
+    MsgBox "Data has been transferred to the respective sheets and formatted."
+End Sub
+
+' Helper function to check if a string contains any digits
+Function ContainsDigits(str As String) As Boolean
+    Dim i As Integer
+    ContainsDigits = False
+    For i = 1 To Len(str)
+        If Mid(str, i, 1) Like "[0-9]" Then
+            ContainsDigits = True
+            Exit Function
+        End If
+    Next i
+End Function
+
