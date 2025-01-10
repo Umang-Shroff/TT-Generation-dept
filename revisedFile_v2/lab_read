@@ -3,6 +3,9 @@ Sub StringMatchingLab22(initialSheets As String)
     Dim wsDestL1 As Worksheet
     Dim wsDestL2 As Worksheet
     Dim wsDestL3 As Worksheet
+    Dim wsDestL4 As Worksheet
+    Dim wsDestL5 As Worksheet
+    Dim wsDestL6 As Worksheet
     Dim ws As Worksheet
     Dim cell As Range
     Dim subject As Variant
@@ -18,21 +21,24 @@ Sub StringMatchingLab22(initialSheets As String)
     Dim sourceSheetName As String ' Variable to hold the current sheet name
     Dim sheetInInitialSheets As Boolean
 
-    ' Set the destination worksheets for each lab
-    Set wsDestL1 = ThisWorkbook.Sheets("L1")
-    Set wsDestL2 = ThisWorkbook.Sheets("L2")
-    Set wsDestL3 = ThisWorkbook.Sheets("L3")
+    ' Set the destination worksheets for each lab (with checks if the sheets exist)
+    Set wsDestL1 = CheckSheetExists("L1") ' Check if sheet "L1" exists
+    Set wsDestL2 = CheckSheetExists("L2") ' Check if sheet "L2" exists
+    Set wsDestL3 = CheckSheetExists("L3") ' Check if sheet "L3" exists
+    Set wsDestL4 = CheckSheetExists("L4") ' Check if sheet "L4" exists
+    Set wsDestL5 = CheckSheetExists("L5") ' Check if sheet "L5" exists
+    Set wsDestL6 = CheckSheetExists("L6") ' Check if sheet "L6" exists
 
     ' Initialize the regex object
     Set regex = CreateObject("VBScript.RegExp")
     regex.IgnoreCase = True
     regex.Global = True
-    ' Modify the pattern to match both "(L1)" and "(L-1)", "(L2)", "(L-2)", "(L3)", "(L-3)"
-    regex.Pattern = "(.*?)(\(L(-?\d+)\))" ' Pattern to capture (L1), (L2), (L3) along with the subject
+    ' Modify the pattern to match both "(L1)", "(L2)", "(L3)", "(L4)", "(L5)", "(L6)" along with the subject
+    regex.Pattern = "(.*?)(\(L(-?\d+)\))" ' Pattern to capture (L1), (L2), (L3), (L4), (L5), (L6) along with the subject
 
     ' Loop through each worksheet in the workbook
     For Each ws In ThisWorkbook.Sheets
-        ' Skip sheets named "64", "65", "66", "L1", "L2", and "L3"
+        ' Skip sheets named "L1", "L2", "L3", "L4", "L5", and "L6"
         sheetInInitialSheets = InStr(1, initialSheets, ws.Name) > 0
 
         ' Only process sheets that are found in initialSheets
@@ -42,24 +48,27 @@ Sub StringMatchingLab22(initialSheets As String)
 
             ' Get the last row with data in the current worksheet
             Dim lastRow As Long
-            lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+            lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).row
 
-            ' Clear any existing data in the subject columns (B onwards) in L1, L2, and L3
-            wsDestL1.Range("A1:A" & lastRow).value = ws.Range("A1:A" & lastRow).value
-            wsDestL2.Range("A1:A" & lastRow).value = ws.Range("A1:A" & lastRow).value
-            wsDestL3.Range("A1:A" & lastRow).value = ws.Range("A1:A" & lastRow).value
+            ' Copy time values to destination sheets (if they exist)
+            If Not wsDestL1 Is Nothing Then wsDestL1.Range("A1:A" & lastRow).value = ws.Range("A1:A" & lastRow).value
+            If Not wsDestL2 Is Nothing Then wsDestL2.Range("A1:A" & lastRow).value = ws.Range("A1:A" & lastRow).value
+            If Not wsDestL3 Is Nothing Then wsDestL3.Range("A1:A" & lastRow).value = ws.Range("A1:A" & lastRow).value
+            If Not wsDestL4 Is Nothing Then wsDestL4.Range("A1:A" & lastRow).value = ws.Range("A1:A" & lastRow).value
+            If Not wsDestL5 Is Nothing Then wsDestL5.Range("A1:A" & lastRow).value = ws.Range("A1:A" & lastRow).value
+            If Not wsDestL6 Is Nothing Then wsDestL6.Range("A1:A" & lastRow).value = ws.Range("A1:A" & lastRow).value
 
             ' Loop through each row in the current worksheet
             For Each cell In ws.UsedRange.Rows
                 ' Get the time value (the first cell in the row)
-                timeValue = ws.Cells(cell.Row, 1).value
+                timeValue = ws.Cells(cell.row, 1).value
 
                 ' Loop through columns B to H (2 to 8)
                 For col = 2 To 8 ' Columns B to H
                     ' Check if the cell in the current column is not empty
-                    If ws.Cells(cell.Row, col).value <> "" Then
+                    If ws.Cells(cell.row, col).value <> "" Then
                         ' Get the full content of the cell
-                        cellContent = ws.Cells(cell.Row, col).value
+                        cellContent = ws.Cells(cell.row, col).value
 
                         ' Find matches using regular expression
                         Set matches = regex.Execute(cellContent)
@@ -67,7 +76,7 @@ Sub StringMatchingLab22(initialSheets As String)
                         ' Loop through all matches (subjects with lab codes)
                         For Each match In matches
                             subject = Trim(match.SubMatches(0)) ' Extract the subject
-                            labCode = Trim(match.SubMatches(1)) ' Extract the lab code (e.g., (L1), (L-1), etc.)
+                            labCode = Trim(match.SubMatches(1)) ' Extract the lab code (e.g., (L1), (L2), (L3) etc.)
 
                             ' Prepend the sheet name to the subject only if the sheet is in the initialSheets list
                             If sheetInInitialSheets Then
@@ -77,28 +86,64 @@ Sub StringMatchingLab22(initialSheets As String)
                             ' Determine the destination row for each lab code
                             Select Case labCode
                                 Case "(L1)", "(L-1)"
-                                    destRow = Application.match(timeValue, wsDestL1.Columns(1), 0)
-                                    If Not IsError(destRow) Then
-                                        Set destCell = wsDestL1.Cells(destRow, col)
-                                        destCell.value = subject & labCode ' Append labCode
-                                        ApplyBlackBorders destCell
-                                        AutoFitCell destCell ' Auto-fit the cell
+                                    If Not wsDestL1 Is Nothing Then
+                                        destRow = Application.match(timeValue, wsDestL1.Columns(1), 0)
+                                        If Not IsError(destRow) Then
+                                            Set destCell = wsDestL1.Cells(destRow, col)
+                                            destCell.value = subject & labCode ' Append labCode
+                                            ApplyBlackBorders destCell
+                                            AutoFitCell destCell ' Auto-fit the cell
+                                        End If
                                     End If
                                 Case "(L2)", "(L-2)"
-                                    destRow = Application.match(timeValue, wsDestL2.Columns(1), 0)
-                                    If Not IsError(destRow) Then
-                                        Set destCell = wsDestL2.Cells(destRow, col)
-                                        destCell.value = subject & labCode ' Append labCode
-                                        ApplyBlackBorders destCell
-                                        AutoFitCell destCell ' Auto-fit the cell
+                                    If Not wsDestL2 Is Nothing Then
+                                        destRow = Application.match(timeValue, wsDestL2.Columns(1), 0)
+                                        If Not IsError(destRow) Then
+                                            Set destCell = wsDestL2.Cells(destRow, col)
+                                            destCell.value = subject & labCode ' Append labCode
+                                            ApplyBlackBorders destCell
+                                            AutoFitCell destCell ' Auto-fit the cell
+                                        End If
                                     End If
                                 Case "(L3)", "(L-3)"
-                                    destRow = Application.match(timeValue, wsDestL3.Columns(1), 0)
-                                    If Not IsError(destRow) Then
-                                        Set destCell = wsDestL3.Cells(destRow, col)
-                                        destCell.value = subject & labCode ' Append labCode
-                                        ApplyBlackBorders destCell
-                                        AutoFitCell destCell ' Auto-fit the cell
+                                    If Not wsDestL3 Is Nothing Then
+                                        destRow = Application.match(timeValue, wsDestL3.Columns(1), 0)
+                                        If Not IsError(destRow) Then
+                                            Set destCell = wsDestL3.Cells(destRow, col)
+                                            destCell.value = subject & labCode ' Append labCode
+                                            ApplyBlackBorders destCell
+                                            AutoFitCell destCell ' Auto-fit the cell
+                                        End If
+                                    End If
+                                Case "(L4)"
+                                    If Not wsDestL4 Is Nothing Then
+                                        destRow = Application.match(timeValue, wsDestL4.Columns(1), 0)
+                                        If Not IsError(destRow) Then
+                                            Set destCell = wsDestL4.Cells(destRow, col)
+                                            destCell.value = subject & labCode ' Append labCode
+                                            ApplyBlackBorders destCell
+                                            AutoFitCell destCell ' Auto-fit the cell
+                                        End If
+                                    End If
+                                Case "(L5)"
+                                    If Not wsDestL5 Is Nothing Then
+                                        destRow = Application.match(timeValue, wsDestL5.Columns(1), 0)
+                                        If Not IsError(destRow) Then
+                                            Set destCell = wsDestL5.Cells(destRow, col)
+                                            destCell.value = subject & labCode ' Append labCode
+                                            ApplyBlackBorders destCell
+                                            AutoFitCell destCell ' Auto-fit the cell
+                                        End If
+                                    End If
+                                Case "(L6)"
+                                    If Not wsDestL6 Is Nothing Then
+                                        destRow = Application.match(timeValue, wsDestL6.Columns(1), 0)
+                                        If Not IsError(destRow) Then
+                                            Set destCell = wsDestL6.Cells(destRow, col)
+                                            destCell.value = subject & labCode ' Append labCode
+                                            ApplyBlackBorders destCell
+                                            AutoFitCell destCell ' Auto-fit the cell
+                                        End If
                                     End If
                             End Select
                         Next match
@@ -110,6 +155,13 @@ Sub StringMatchingLab22(initialSheets As String)
 
     MsgBox "Subjects have been added to their respective lab sheets based on time."
 End Sub
+
+' Function to check if a sheet exists and return it, else return Nothing
+Function CheckSheetExists(sheetName As String) As Worksheet
+    On Error Resume Next
+    Set CheckSheetExists = ThisWorkbook.Sheets(sheetName)
+    On Error GoTo 0
+End Function
 
 ' Subroutine to apply black borders to a cell
 Sub ApplyBlackBorders(ByVal destCell As Range)
