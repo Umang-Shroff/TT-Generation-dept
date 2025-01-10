@@ -1,0 +1,62 @@
+Sub AddFirstRowAndColumn(initialSheets As String)
+    Dim ws As Worksheet
+    Dim sheetName As Variant
+    Dim initialSheetNames() As String
+    Dim initialSheet As Worksheet
+    Dim firstSheet As Worksheet
+    Dim firstRow As Range
+    Dim firstCol As Range
+    Dim lastRow As Long
+    Dim lastCol As Long
+    Dim targetRange As Range
+    
+    ' Split the initialSheets string into an array of sheet names
+    initialSheetNames = Split(initialSheets, vbCrLf)
+    
+    ' Get the first sheet in the initialSheets list (we assume it's the first one)
+    Set firstSheet = ThisWorkbook.sheets(initialSheetNames(0))
+    
+    ' Get the first row and first column from the first sheet in initialSheets
+    Set firstRow = firstSheet.Rows(1) ' First row
+    Set firstCol = firstSheet.Columns(1) ' First column
+    
+    ' Loop through all sheets in the workbook
+    For Each ws In ThisWorkbook.sheets
+        ' Skip the sheets that are in initialSheets
+        If Not IsInArray(ws.Name, initialSheetNames) Then
+            ' Copy the first row from firstSheet to the current sheet (ws)
+            firstRow.Copy Destination:=ws.Rows(1)
+            
+            ' Copy the first column from firstSheet to the current sheet (ws)
+            firstCol.Copy Destination:=ws.Columns(1)
+            
+            ' Get the last used row and last used column in the current sheet (ws)
+            lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+            lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+            
+            ' Define the target range to apply borders, from A2 to last used row and column
+            Set targetRange = ws.Range(ws.Cells(2, 2), ws.Cells(lastRow, lastCol))
+            
+            ' Apply borders to the target range
+            With targetRange.Borders
+                .LineStyle = xlContinuous
+                .Color = vbBlack
+                .TintAndShade = 0
+                .Weight = xlThin
+            End With
+        End If
+    Next ws
+End Sub
+
+' Helper function to check if a sheet name is in the initialSheets list
+Function IsInArray(value As String, arr As Variant) As Boolean
+    Dim element As Variant
+    IsInArray = False
+    For Each element In arr
+        If element = value Then
+            IsInArray = True
+            Exit Function
+        End If
+    Next element
+End Function
+
