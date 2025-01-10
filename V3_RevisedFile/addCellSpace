@@ -6,7 +6,7 @@ Sub SameCellLength(initialSheets As String)
     Dim fixedColWidth As Double
     
     ' Set fixed row height and column width to contain data like "ADS (ADM) (66)"
-    fixedRowHeight = 55 ' Set the row height (in points) to accommodate ~5 lines of text
+    fixedRowHeight = 40 ' Set the row height (in points) to accommodate ~5 lines of text
     fixedColWidth = 25 ' Set the column width (in characters)
     
     ' Split the initialSheets string into an array of sheet names
