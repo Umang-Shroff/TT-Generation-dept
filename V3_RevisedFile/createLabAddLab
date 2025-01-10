@@ -1,0 +1,140 @@
+Sub CreateAndReadLab(initialSheets As String)
+    Dim wsSource As Worksheet
+    Dim wsDest As Worksheet
+    Dim cell As Range
+    Dim userInput As String
+    Dim roomNumbers() As String
+    Dim sheetName As Variant
+    Dim roomNumber As Variant
+    Dim sheetExists As Boolean
+    Dim sourceCellAddress As String
+    Dim roomMatch As Boolean
+    Dim regex As Object
+    Dim matches As Object
+    Dim match As Variant
+    Dim lastRow As Long
+    Dim lastCol As Long
+    Dim targetRange As Range
+    Dim sourceSheetName As String
+    Dim fullSubject As String
+    Dim fixedRowHeight As Double
+    Dim fixedColWidth As Double
+    
+    ' Set fixed row height and column width for all cells
+    fixedRowHeight = 20 ' Set the row height as desired (in points)
+    fixedColWidth = 15 ' Set the column width as desired (in characters)
+
+    ' Ask user to input the room numbers or names separated by spaces
+    userInput = InputBox("Enter Lab names SEPARATED BY SPACES (e.g., L1 L2 L3):", "Enter Lab names")
+    
+    ' Split the user input into an array of room numbers or names
+    roomNumbers = Split(userInput, " ")
+    
+    ' Create sheets for each room number or name entered by the user
+    For Each roomNumber In roomNumbers
+        ' Check if the sheet already exists
+        sheetExists = False
+        On Error Resume Next
+        Set wsDest = ThisWorkbook.sheets(roomNumber)
+        On Error GoTo 0
+        
+        ' If the sheet doesn't exist, create it
+        If wsDest Is Nothing Then
+            Set wsDest = ThisWorkbook.sheets.Add(After:=ThisWorkbook.sheets(ThisWorkbook.sheets.Count))
+            wsDest.Name = roomNumber
+        End If
+        Set wsDest = Nothing ' Reset wsDest before the next iteration
+    Next roomNumber
+    
+    ' Set up regex to detect room number format inside parentheses
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.IgnoreCase = True
+    regex.Global = True
+    regex.Pattern = "\((\S+)\)" ' To match any non-space content inside parentheses
+    
+    ' Loop through each sheet in initialSheets
+    Dim sheetNames() As String
+    sheetNames = Split(initialSheets, vbCrLf) ' Split sheet names into an array
+    
+    For Each sheetName In sheetNames
+        If Len(sheetName) > 0 Then ' Ignore empty entries
+            Set wsSource = ThisWorkbook.sheets(sheetName)
+            
+            ' Loop through each cell in the source sheet
+            For Each cell In wsSource.UsedRange
+                If Not IsEmpty(cell.value) Then
+                    ' Use regex to find any match to room numbers or names
+                    Set matches = regex.Execute(cell.value)
+                    
+                    ' If a match is found, check if it is one of the user input room numbers or names
+                    For Each match In matches
+                        roomMatch = False
+                        For Each roomNumber In roomNumbers
+                            If match.Submatches(0) = roomNumber Then
+                                roomMatch = True
+                                Exit For
+                            End If
+                        Next roomNumber
+                        
+                        ' If the room number matches, copy the cell to the appropriate sheet
+                        If roomMatch Then
+                            ' Ensure wsDest is set to the correct sheet
+                            On Error Resume Next
+                            Set wsDest = ThisWorkbook.sheets(match.Submatches(0)) ' Get the corresponding sheet
+                            On Error GoTo 0
+                            
+                            ' If the destination sheet exists, copy the cell
+                            If Not wsDest Is Nothing Then
+                                sourceCellAddress = cell.Address
+                                
+                                ' Get the source sheet's name and append it to the cell value
+                                sourceSheetName = wsSource.Name
+                                
+                                ' Format the new value with the source sheet's name in parentheses
+                                fullSubject = "(" & sourceSheetName & ") " & cell.value
+                                
+                                ' Copy the new value to the destination sheet
+                                wsDest.Range(sourceCellAddress).value = fullSubject
+                            End If
+                        End If
+                    Next match
+                End If
+            Next cell
+            
+            ' ** New functionality: Copy A1 Row and A1 Column from wsSource to wsDest **
+            ' Copy the A1 row (first row) from wsSource to wsDest
+            wsSource.Rows(1).Copy Destination:=wsDest.Rows(1)
+            
+            ' Copy the A1 column (first column) from wsSource to wsDest
+            wsSource.Columns(1).Copy Destination:=wsDest.Columns(1)
+            
+            ' ** New functionality: Set Fixed Row Height and Column Width**
+            ' Set the same row height and column width for all cells in the new sheet
+            wsDest.Rows.RowHeight = fixedRowHeight ' Set row height
+            wsDest.Columns.ColumnWidth = fixedColWidth ' Set column width
+            
+            ' ** New functionality: AutoFit the cells in the destination sheet (wsDest) **
+            wsDest.Rows.AutoFit  ' AutoFit all rows (but the height will remain fixed)
+            wsDest.Columns.AutoFit  ' AutoFit all columns (but the width will remain fixed)
+            
+            ' ** New functionality: Enable Text Wrapping for all cells in wsDest **
+            wsDest.Cells.WrapText = True ' Enable text wrapping for all cells
+            
+            ' ** New functionality: Add Borders to all cells between A1 row and A1 column in wsDest **
+            lastRow = wsDest.Cells(wsDest.Rows.Count, 1).End(xlUp).Row ' Get the last row with data
+            lastCol = wsDest.Cells(1, wsDest.Columns.Count).End(xlToLeft).Column ' Get the last column with data
+            
+            ' Ensure the target range starts from (2, 2) to skip headers, as A1 row and column have been copied
+            Set targetRange = wsDest.Range(wsDest.Cells(2, 2), wsDest.Cells(lastRow, lastCol))
+            
+            ' Apply borders to the target range
+            With targetRange.Borders
+                .LineStyle = xlContinuous
+                .Color = vbBlack
+                .TintAndShade = 0
+                .Weight = xlThin
+            End With
+        End If
+    Next sheetName
+End Sub
+
