@@ -22,6 +22,8 @@ Sub RunAllModules()
     Call addFillData.InsertRowsAtTop(initialSheets)
     Call merge.MergeSameValueCellsOnAllSheets
     Call addCellSpace.SameCellLength(initialSheets)
+    Call insertHeader.insertHeader(initialSheets)
+    Call InsertFooter.InsertFooter(initialSheets)
 End Sub
 
 
