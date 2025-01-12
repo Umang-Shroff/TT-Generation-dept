@@ -18,9 +18,10 @@ Sub RunAllModules()
     Call V2ReadLab.CreateAndReadLab(initialSheets)
     Call createTeachSheets.createSheetsFromUniqueValues(initialSheets)
     Call copyTeachValues.copyValuesToSheets(initialSheets)
+    Call putRowAndColumn.AddFirstRowAndColumn(initialSheets)
+    Call addFillData.InsertRowsAtTop(initialSheets)
     Call merge.MergeSameValueCellsOnAllSheets
     Call addCellSpace.SameCellLength(initialSheets)
-    Call putRowAndColumn.AddFirstRowAndColumn(initialSheets)
 End Sub
 
 
