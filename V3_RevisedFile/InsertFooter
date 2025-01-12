@@ -1,0 +1,46 @@
+Sub InsertFooter(initialSheets As String)
+    Dim imagePath As String
+    Dim ws As Worksheet
+    Dim img As Picture
+    Dim sheetName As String
+    Dim Rng As Range
+    Dim excludeSheet As Boolean
+    Dim reducedWidth As Double
+
+    ' Set the image file path (change to your image's file path)
+    imagePath = "C:\Users\Umang\OneDrive\Pictures\Screenshots\ttgenerationFooter.jpeg"
+    
+    ' Loop through all worksheets in the workbook
+    For Each ws In ThisWorkbook.Sheets
+        ' Get the name of the current sheet
+        sheetName = ws.Name
+        
+        ' Check if the sheet name is present in the initialSheets string
+        excludeSheet = (InStr(initialSheets, sheetName) > 0)
+        
+        ' If the sheet name is not found in the initialSheets string, insert the footer image
+        If Not excludeSheet Then
+            ' Set the range for resizing the image (A26:G28 to span 3 rows and columns A-G)
+            Set Rng = ws.Range("A26:G28")
+            
+            ' Insert the image into the worksheet
+            Set img = ws.Pictures.Insert(imagePath)
+            
+            ' Position the image in the range
+            With img
+                .Left = Rng.Left
+                .Top = Rng.Top
+                .Width = Rng.Width
+                .Height = Rng.Height
+                .ShapeRange.LockAspectRatio = msoFalse ' Allow resizing the aspect ratio
+                
+                ' Decrease the width by a factor (e.g., reduce to 70% of the original width)
+                reducedWidth = .Width * 0.8 ' Adjust the factor (e.g., 0.7 means 70% of original width)
+                
+                ' Apply the reduced width
+                .Width = reducedWidth
+            End With
+        End If
+    Next ws
+End Sub
+
