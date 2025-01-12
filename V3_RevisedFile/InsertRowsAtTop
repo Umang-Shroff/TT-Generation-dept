@@ -1,0 +1,33 @@
+Sub InsertRowsAtTop(initialSheets As String)
+    Dim ws As Worksheet
+    Dim rowCount As Integer
+    Dim sheetName As Variant
+    Dim sheetNames() As String
+    Dim sheetExists As Boolean
+    
+    rowCount = 4 ' Number of rows to insert
+    
+    ' Split the initialSheets string into an array of sheet names
+    sheetNames = Split(initialSheets, vbCrLf)
+    
+    ' Loop through each worksheet in the workbook
+    For Each ws In ThisWorkbook.Sheets
+        ' Check if the current sheet is in the initialSheets list
+        sheetExists = False
+        For Each sheetName In sheetNames
+            If ws.Name = sheetName Then
+                sheetExists = True
+                Exit For
+            End If
+        Next sheetName
+        
+        ' If the sheet is not in the initialSheets list, insert rows
+        If Not sheetExists Then
+            ws.Rows("1:" & rowCount).Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+        End If
+    Next ws
+    
+    MsgBox "10 rows inserted at the top of each sheet (except for specified sheets)!", vbInformation
+End Sub
+
+
