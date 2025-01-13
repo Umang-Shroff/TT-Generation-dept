@@ -14,14 +14,14 @@ Sub AddFirstRowAndColumn(initialSheets As String)
     initialSheetNames = Split(initialSheets, vbCrLf)
     
     ' Get the first sheet in the initialSheets list (we assume it's the first one)
-    Set firstSheet = ThisWorkbook.sheets(initialSheetNames(0))
+    Set firstSheet = ThisWorkbook.Sheets(initialSheetNames(0))
     
     ' Get the first row and first column from the first sheet in initialSheets
     Set firstRow = firstSheet.Rows(1) ' First row
     Set firstCol = firstSheet.Columns(1) ' First column
     
     ' Loop through all sheets in the workbook
-    For Each ws In ThisWorkbook.sheets
+    For Each ws In ThisWorkbook.Sheets
         ' Skip the sheets that are in initialSheets
         If Not IsInArray(ws.Name, initialSheetNames) Then
             ' Copy the first row from firstSheet to the current sheet (ws)
@@ -44,6 +44,9 @@ Sub AddFirstRowAndColumn(initialSheets As String)
                 .TintAndShade = 0
                 .Weight = xlThin
             End With
+
+            ' Set the font size for all cells in the current sheet
+            ws.Cells.Font.Size = 32
         End If
     Next ws
 End Sub
