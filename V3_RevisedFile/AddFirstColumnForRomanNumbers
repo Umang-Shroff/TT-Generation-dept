@@ -1,0 +1,74 @@
+Sub InputStartRow(initialSheets As String)
+    Dim ws As Worksheet
+    Dim excludedSheets() As String
+    Dim sheetName As String
+    Dim usedRows As Long
+    Dim insertCol As Long
+    Dim i As Long
+    Dim targetRange As Range
+
+    ' Split the initialSheets string into an array of sheet names
+    excludedSheets = Split(initialSheets, vbCrLf)
+    
+    ' Specify the column where the new column should be inserted (e.g., 1 for column A)
+    insertCol = 1 ' Change this to the desired column position (A)
+    
+    ' Loop through all sheets in the workbook
+    For Each ws In ThisWorkbook.Sheets
+        sheetName = ws.Name
+        ' Skip the sheets that are in the initialSheets list
+        If Not IsInArray(sheetName, excludedSheets) Then
+            ' Activate the worksheet
+            ws.Activate
+            
+            ' Determine the number of used rows
+            usedRows = ws.UsedRange.Rows.Count
+            
+            ' Insert a new column at the specified position
+            ws.Columns(insertCol).Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+            
+            ' Set the header in the first row
+            With ws.Cells(1, insertCol)
+                .value = "No."
+                .Font.Bold = True
+            End With
+            
+            ' Fill subsequent cells in the column with static numbers starting from 1
+            If usedRows > 1 Then
+                For i = 2 To usedRows
+                    ws.Cells(i, insertCol).value = i - 1
+                Next i
+            End If
+            
+            ' Apply bold formatting to the entire column in the used range
+            ws.Range(ws.Cells(1, insertCol), ws.Cells(usedRows, insertCol)).Font.Bold = True
+            
+            ' Define the target range for the newly filled column (A2 to A[usedRows])
+            Set targetRange = ws.Range(ws.Cells(1, insertCol), ws.Cells(usedRows, insertCol))
+            
+            ' Apply borders to the target range
+            With targetRange.Borders
+                .LineStyle = xlContinuous
+                .Color = vbBlack
+                .TintAndShade = 0
+                .Weight = xlThin
+            End With
+        End If
+    Next ws
+    
+    MsgBox "Numbered column with static numbers and borders added to all worksheets with bold text!", vbInformation
+End Sub
+
+' Helper function to check if a sheet name is in the initialSheets list
+Function IsInArray(value As String, arr As Variant) As Boolean
+    Dim element As Variant
+    IsInArray = False
+    For Each element In arr
+        If element = value Then
+            IsInArray = True
+            Exit Function
+        End If
+    Next element
+End Function
+
+
