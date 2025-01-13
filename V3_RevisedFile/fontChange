@@ -1,0 +1,31 @@
+Sub FontChange(initialSheets As String)
+    Dim ws As Worksheet
+    Dim excludedSheets() As String
+    Dim sheetName As String
+    
+    ' Split the initialSheets string into an array of sheet names
+    excludedSheets = Split(initialSheets, vbCrLf)
+    
+    ' Loop through all sheets in the workbook
+    For Each ws In ThisWorkbook.Sheets
+        sheetName = ws.Name
+        ' Skip the sheets that are in the initialSheets list
+        If Not IsInArray(sheetName, excludedSheets) Then
+            ' Change font of all cells in the current sheet to Times New Roman
+            ws.Cells.Font.Name = "Times New Roman"
+        End If
+    Next ws
+End Sub
+
+' Helper function to check if a sheet name is in the initialSheets list
+Function IsInArray(value As String, arr As Variant) As Boolean
+    Dim element As Variant
+    IsInArray = False
+    For Each element In arr
+        If element = value Then
+            IsInArray = True
+            Exit Function
+        End If
+    Next element
+End Function
+
