@@ -35,12 +35,12 @@ Sub CreateAndReadLab(initialSheets As String)
         ' Check if the sheet already exists
         sheetExists = False
         On Error Resume Next
-        Set wsDest = ThisWorkbook.sheets(roomNumber)
+        Set wsDest = ThisWorkbook.Sheets(roomNumber)
         On Error GoTo 0
         
         ' If the sheet doesn't exist, create it
         If wsDest Is Nothing Then
-            Set wsDest = ThisWorkbook.sheets.Add(After:=ThisWorkbook.sheets(ThisWorkbook.sheets.Count))
+            Set wsDest = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
             wsDest.Name = roomNumber
         End If
         Set wsDest = Nothing ' Reset wsDest before the next iteration
@@ -58,7 +58,7 @@ Sub CreateAndReadLab(initialSheets As String)
     
     For Each sheetName In sheetNames
         If Len(sheetName) > 0 Then ' Ignore empty entries
-            Set wsSource = ThisWorkbook.sheets(sheetName)
+            Set wsSource = ThisWorkbook.Sheets(sheetName)
             
             ' Loop through each cell in the source sheet
             For Each cell In wsSource.UsedRange
@@ -80,7 +80,7 @@ Sub CreateAndReadLab(initialSheets As String)
                         If roomMatch Then
                             ' Ensure wsDest is set to the correct sheet
                             On Error Resume Next
-                            Set wsDest = ThisWorkbook.sheets(match.Submatches(0)) ' Get the corresponding sheet
+                            Set wsDest = ThisWorkbook.Sheets(match.Submatches(0)) ' Get the corresponding sheet
                             On Error GoTo 0
                             
                             ' If the destination sheet exists, copy the cell
