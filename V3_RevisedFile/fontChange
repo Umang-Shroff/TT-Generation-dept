@@ -13,6 +13,7 @@ Sub FontChange(initialSheets As String)
         If Not IsInArray(sheetName, excludedSheets) Then
             ' Change font of all cells in the current sheet to Times New Roman
             ws.Cells.Font.Name = "Times New Roman"
+            ' ws.Cells.Font.Size = "16"
         End If
     Next ws
 End Sub
