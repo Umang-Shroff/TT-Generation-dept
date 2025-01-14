@@ -1,0 +1,74 @@
+Sub RemoveLabExtra(initialSheets As String)
+    Dim wsSource As Worksheet
+    Dim cell As Range
+    Dim sheetName As Variant
+    Dim initialSheetsList() As String
+    Dim cellValue As String
+    Dim matchStartPos As Long
+    Dim reverseReadStart As Long
+    Dim reverseStr As String
+    Dim spaceCount As Long
+    Dim processedValue As String
+    Dim sheetNameInCell As String
+    
+    ' Convert initialSheets into an array
+    initialSheetsList = Split(initialSheets, vbCrLf)
+    
+    ' Loop through all sheets in the workbook
+    For Each wsSource In ThisWorkbook.Sheets
+        ' Skip sheets in initialSheets and those that don't start with "L"
+        If Left(wsSource.Name, 1) = "L" And Not IsInArray(wsSource.Name, initialSheetsList) Then
+            ' Loop through all the cells in the used range of the sheet
+            For Each cell In wsSource.UsedRange
+                If Not IsEmpty(cell.value) Then
+                    cellValue = cell.value
+                    sheetNameInCell = "(" & wsSource.Name & ")"
+                    
+                    ' Check if the sheet name in parentheses exists in the cell value
+                    If InStr(cellValue, sheetNameInCell) > 0 Then
+                        ' Find the position of the sheet name in parentheses (e.g., (L1))
+                        matchStartPos = InStr(cellValue, sheetNameInCell)
+                        
+                        ' Remove everything after the sheet name
+                        cellValue = Left(cellValue, matchStartPos + Len(sheetNameInCell) - 1)
+                        
+                        ' Now, check backwards for 3 consecutive spaces
+                        reverseReadStart = matchStartPos - 1 ' Start at one character before the closing parenthesis
+                        reverseStr = Mid(cellValue, reverseReadStart, 1)
+                        spaceCount = 0
+                        
+                        ' Loop backwards through the string to look for 3 consecutive spaces
+                        Do While reverseReadStart > 0
+                            reverseStr = Mid(cellValue, reverseReadStart, 1) & reverseStr
+                            
+                            ' Check for exactly three consecutive spaces
+                            If reverseStr Like "*   *" Then
+                                ' Remove everything before the spaces, keep the value after the spaces
+                                processedValue = Mid(cellValue, reverseReadStart + 1, Len(cellValue) - reverseReadStart)
+                                cell.value = processedValue
+                                Exit Do
+                            End If
+                            
+                            reverseReadStart = reverseReadStart - 1
+                        Loop
+                        
+                        ' If no three consecutive spaces are found, just keep the data until the sheet name
+                        If reverseReadStart <= 0 Then
+                            cell.value = cellValue
+                        End If
+                    End If
+                End If
+            Next cell
+        End If
+    Next wsSource
+End Sub
+
+' Function to check if an item exists in an array
+Function IsInArray(val As Variant, arr As Variant) As Boolean
+    On Error GoTo ErrorHandler
+    IsInArray = Not IsError(Application.match(val, arr, 0))
+    Exit Function
+ErrorHandler:
+    IsInArray = False
+End Function
+
