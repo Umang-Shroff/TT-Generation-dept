@@ -1,0 +1,30 @@
+Sub RunLecAll()
+    Dim ws As Worksheet
+    Dim initialSheets As String
+    Dim sheetName As String
+
+    ' Initialize an empty string to store the sheet names
+    initialSheets = ""
+
+    ' Loop through each worksheet and append its name to the initialSheets variable
+    For Each ws In ThisWorkbook.Sheets
+        sheetName = ws.Name
+        initialSheets = initialSheets & sheetName & vbCrLf ' New line after each sheet name
+    Next ws
+
+    ' Now, call the subroutines from different modules and pass initialSheets as parameter
+    Call unmerge.UnmergeAndRetainValuesOnAllSheets
+    Call V2ReadLec.CreateAndReadLecture(initialSheets)
+    Call putRowAndColumn.AddFirstRowAndColumn(initialSheets)
+    Call inputSerialNumber.InputStartRow(initialSheets)
+    Call addFillData.InsertRowsAtTop(initialSheets)
+    Call merge.MergeSameValueCellsOnAllSheets
+    Call addCellSpace.SameCellLength(initialSheets)
+    Call insertHeader.insertHeader(initialSheets)
+    Call InsertFooter.InsertFooter(initialSheets)
+    Call FontChange.FontChange(initialSheets)
+    Call cellsCentered.CenterCells(initialSheets)
+    Call fontIsBold.isBold(initialSheets)
+End Sub
+
+
